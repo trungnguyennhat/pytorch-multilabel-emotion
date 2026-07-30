@@ -19,18 +19,18 @@ raw text and labels
 
 <!-- CURRENT_STATUS_START -->
 
-- **Project state:** Not started
-- **Current stage:** Stage 0 — Environment, repository and experiment contract
-- **Current work package:** Work Package 0A — Create the repository, verify the PyTorch/CUDA environment and define reproducibility settings
+- **Project state:** In progress
+- **Current stage:** Stage 1 — GoEmotions dataset audit and problem formulation
+- **Current work package:** Work Package 1 — Load, audit and validate GoEmotions; freeze splits and label mapping
 - **Reusable work from previous project:** Người học đã hoàn thành project MT vs LLM, có kinh nghiệm thiết kế evaluation set, chạy experiment có schema thống nhất, so sánh model và viết final technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Tạo repository, virtual environment, dependency file và folder tối thiểu; kiểm tra Python, PyTorch, CUDA, GPU RTX 5060 Ti 16GB; đặt random seeds và lưu environment summary
-- **Evidence required to complete current package:** Có output xác nhận PyTorch nhận CUDA; GPU name và VRAM được in; dependency versions được lưu; repository có README, AGENTS, `.gitignore`, `requirements.txt` hoặc `pyproject.toml`, cùng folder tối thiểu cho notebooks/src/outputs/reports
+- **Next action:** Brainstorm và chốt thiết kế package audit GoEmotions trước khi viết code: dataset configuration, schema, official splits, data-quality checks, label order, multi-hot example và artifact outputs
+- **Evidence required to complete current package:** Dataset config/schema và split sizes từ loader thực tế; missing/empty/duplicate statistics; label names/order; một multi-hot target đúng shape và `float32`; dataset summary cùng label mapping artifacts được lưu
 - **Blockers:** None
 - **Last updated:** 2026-07-30
 
 ### Stage progress
 
-- [ ] Stage 0 — Environment, repository and experiment contract
+- [x] Stage 0 — Environment, repository and experiment contract
 - [ ] Stage 1 — GoEmotions dataset audit and problem formulation
 - [ ] Stage 2 — Exploratory data analysis and preprocessing design
 - [ ] Stage 3 — TF-IDF and Logistic Regression baseline
