@@ -1,0 +1,10 @@
+torch==2.13.0+cu132
+pandas==3.0.5
+numpy==2.5.1
+scikit-learn==1.9.0
+datasets==5.0.1
+matplotlib==3.11.1
+tqdm==4.70.0
+pyyaml==6.0.3
+jupyter==1.1.1
+seaborn==0.13.2

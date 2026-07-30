@@ -1,0 +1,26 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# Outputs có thể rất lớn
+outputs/checkpoints/*.pt
+outputs/checkpoints/*.pth
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Data cache (Hugging Face datasets sẽ cache ở ~/.cache)
+data/raw/
+data/processed/*.pkl
