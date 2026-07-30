@@ -58,12 +58,13 @@ Hướng dẫn theo một work package hoàn chỉnh gồm khoảng 2–5 thao t
 
 Scope của stage hiện tại trong `README.md` là hard boundary. Trước khi viết code, agent phải rút gọn package thành bốn phần: input bắt buộc, processing bắt buộc, output/artifact bắt buộc và invariant cần bảo vệ. Mọi file, function, class, helper, check, metadata hoặc artifact không ánh xạ trực tiếp tới một trong bốn phần này phải bị loại bỏ hoặc hoãn sang stage phù hợp.
 
-Mục tiêu implementation là **ít code nhất có thể nhưng vẫn hoàn thành đúng scope và bảo vệ correctness của experiment**. `Code đầy đủ` nghĩa là minimum implementation chạy end-to-end, không phải thêm sẵn capability, best practice hoặc infrastructure có thể hữu ích trong tương lai.
+Mục tiêu implementation là **gọn nhưng vẫn phân tách rõ các trách nhiệm cần thiết để hoàn thành đúng scope và bảo vệ correctness của experiment**. Không đánh giá độ tối giản chỉ bằng số dòng, số function hoặc việc mọi logic nằm trong một hàm. `Code đầy đủ` nghĩa là minimum implementation chạy end-to-end, không phải thêm sẵn capability, best practice hoặc infrastructure có thể hữu ích trong tương lai.
 
 Khi thiết kế component:
 
-- Dùng số file và số function ít nhất vẫn giữ được high cohesion, low coupling và input/output rõ ràng.
-- Không tạo helper chỉ để chia nhỏ phần giải thích, rút ngắn code block hoặc bọc một thao tác chỉ được gọi một lần. Chỉ tách helper khi nó đại diện cho một trách nhiệm domain riêng, bảo vệ một invariant riêng hoặc làm data flow rõ hơn đáng kể.
+- Dùng số file và số function **vừa đủ** để giữ high cohesion, low coupling và input/output rõ ràng. Với một work-package script, mặc định giữ trong một file; chỉ tách thêm file khi có component cần tái sử dụng hoặc một boundary độc lập rõ ràng.
+- Không tạo helper chỉ để chia nhỏ phần giải thích, rút ngắn code block hoặc bọc một thao tác đơn lẻ. Một function dù chỉ được gọi một lần vẫn nên được tách khi nó đại diện cho một pha domain có input/output riêng, bảo vệ một invariant riêng hoặc có thể được kiểm tra độc lập.
+- Không dồn các pha khác trách nhiệm như load/validate dữ liệu, audit hoặc transformation, xây report và ghi artifact vào cùng một function chỉ để giảm số function. `main()` nên chủ yếu điều phối các pha; các kiểm tra liên quan có thể dùng chung một lượt duyệt và nằm trong cùng function cohesive.
 - Độ chi tiết của lời giải thích không quyết định kiến trúc code: có thể giải thích một function theo các phần nhỏ mà không biến mỗi phần thành một function mới.
 - Ưu tiên data flow thẳng, một lần xử lý khi hợp lý và thư viện/API đã có trong stack. Không thêm CLI, resolver, registry, config layer, hashing, report generator, logging, caching hoặc abstraction tổng quát nếu completion criteria hiện tại không yêu cầu.
 - Không thực hiện EDA, preprocessing, optimization, metadata enrichment, validation bổ sung hoặc artifact phụ của stage sau chỉ vì chúng có vẻ hữu ích.
@@ -78,65 +79,33 @@ Không áp dụng TDD cho mọi helper. Chỉ yêu cầu test/assertion khi bả
 
 Một batch inspection, smoke run, overfit-small-batch check hoặc output artifact cuối package thường là đủ.
 
-### Brainstorming trước implementation
+### Thiết kế trước implementation
 
-Trước work package mới, agent phải trình bày một pha thiết kế riêng theo góc nhìn của ML/DL Engineer. Thiết kế phải đi từ ý nghĩa của bài toán và tính hợp lệ của experiment xuống representation và implementation contract; không bắt đầu bằng tên file, function, class hoặc danh sách thao tác code.
+Trước work package mới, agent phải trình bày một pha thiết kế riêng theo góc nhìn ML/DL Engineer. Thiết kế đi từ ý nghĩa bài toán và tính hợp lệ của experiment xuống representation và implementation contract; không mở đầu bằng file, function hoặc thao tác code.
 
 Thứ tự tư duy mặc định:
 
-1. Nối stage vừa hoàn thành với mục tiêu nghiên cứu hoặc năng lực hệ thống cần xây tiếp; giải thích vì sao project cần package này trước khi chuyển stage.
-2. Định nghĩa prediction unit, input, target/output semantics, loại bài toán và system boundary. Sửa rõ các nhầm lẫn như multi-label với multi-class trước khi nói về model hoặc loss.
-3. Xác định các quyết định làm thay đổi ý nghĩa khoa học của experiment: nguồn và phiên bản dữ liệu, representation, split roles, label ontology, preprocessing boundary, model-selection policy hoặc evaluation unit.
-4. Thiết kế cách bảo vệ experiment trước missing data, duplicate, leakage, label ambiguity, imbalance và distribution shift; nêu rõ anomaly nào chỉ báo cáo, anomaly nào buộc phải dừng và anomaly nào có thể dẫn đến thay đổi dữ liệu sau khi được duyệt.
-5. Chỉ sau các quyết định trên mới mô tả data flow và tensor contract cần thiết để nối sang implementation: shapes, dtypes, masks, devices và quan hệ giữa targets, logits, probabilities, predictions khi chúng ảnh hưởng đến correctness.
-6. So sánh hai hoặc ba phương án khi có trade-off thực sự, kèm phương án khuyến nghị và lý do nó phù hợp với mục tiêu hiện tại. Không tạo phương án giả chỉ để đủ số lượng.
-7. Kết lại bằng luồng xử lý end-to-end, artifact cần tạo, completion criteria và evidence có thể dùng để xác nhận package chạy đúng.
+1. Nối stage vừa hoàn thành với mục tiêu nghiên cứu hoặc năng lực cần xây tiếp.
+2. Định nghĩa prediction unit, input, target/output semantics, loại bài toán và system boundary; sửa rõ nhầm lẫn như multi-label với multi-class.
+3. Chốt các quyết định ảnh hưởng ý nghĩa khoa học: nguồn và phiên bản dữ liệu, split roles, label ontology, representation, preprocessing boundary, model-selection policy và evaluation unit.
+4. Xác định risks như missing data, duplicate, leakage, ambiguity, imbalance hoặc distribution shift; nêu anomaly nào chỉ báo cáo, anomaly nào buộc dừng và thay đổi nào cần được duyệt.
+5. Mô tả data flow và tensor contract cần cho correctness: shapes, dtypes, masks, devices và quan hệ giữa targets, logits, probabilities, predictions.
+6. Chỉ so sánh phương án khi có trade-off thật; nêu khuyến nghị và lý do phù hợp với stage hiện tại.
+7. Kết lại bằng workflow end-to-end, artifact, completion criteria và evidence cần có.
 
-Trong pha thiết kế, không đưa code implementation và không đi sâu vào helper, signature, abstraction hoặc file layout trừ khi chi tiết đó cần để làm rõ interface hay artifact. Tên file và lệnh chạy, nếu cần, chỉ nên xuất hiện gần cuối sau khi ý tưởng xử lý đã rõ.
+Phần thiết kế phải:
 
-Sau thiết kế, dừng và chờ người học xác nhận. Chỉ sau khi được đồng ý mới hướng dẫn code. Nếu thay đổi schema, split, label order, experiment contract hoặc architecture đã duyệt, phải dừng và xin xác nhận lại.
+- Giải thích quyết định theo mạch `đặc điểm quan sát được → rủi ro → phương án → khuyến nghị`, không chỉ liệt kê phép kiểm tra.
+- Phân biệt điều code/output đã xác nhận, điều tài liệu mô tả và điều loader hoặc experiment vẫn cần kiểm chứng.
+- Với anomaly, nói rõ invariant được bảo vệ, ảnh hưởng nếu sai và chính sách `báo cáo / dừng / đề xuất thay đổi`.
+- Không mặc định can thiệp imbalance, preprocessing, sampling hoặc threshold; luôn giữ baseline không can thiệp và nêu stage nào chỉ đo so với stage nào mới thử intervention.
+- Nêu những gì cố ý chưa làm để không trộn data audit, preprocessing, modeling và evaluation.
+- Dùng ngôn ngữ dễ hiểu, giải thích thuật ngữ khi xuất hiện và dùng ví dụ nhỏ khi cần. Cấu trúc response phục vụ nội dung, không bắt buộc lặp một template dài cho mọi package.
+- Với thiết kế phức tạp, mở đầu bằng đoạn “Tóm lại” ngắn về việc đang làm, chưa làm và lý do; dùng giọng cộng tác như “chúng ta cần xác nhận”, “mình đề xuất” hoặc “nếu evidence cho thấy”.
 
-Chỉ hỏi clarification khi câu trả lời làm thay đổi đáng kể thiết kế; mỗi lần tối đa một câu. Nếu context đủ, dùng assumption hợp lý.
+Trong pha thiết kế không đưa code implementation hoặc đi sâu vào helper, signature và file layout trừ khi cần làm rõ contract. Sau thiết kế, dừng và chờ người học xác nhận; nếu thay đổi schema, split, label order, experiment contract hoặc architecture đã duyệt, phải xin xác nhận lại.
 
-### Cách giải thích và trao đổi thiết kế
-
-Phần brainstorm phải giống một cuộc trao đổi thiết kế với một ML/DL Engineer, không phải báo cáo một chiều, danh sách kiểm tra thiếu giải thích hoặc bản mô tả code chưa viết. Người đọc phải hiểu trước `chúng ta đang định nghĩa hệ thống nào, vì sao chọn cách xử lý này và quyết định đó bảo vệ kết luận experiment ra sao`; chi tiết code chỉ là hệ quả của thiết kế.
-
-Agent phải:
-
-- Trình bày top-down theo mạch `mục tiêu nghiên cứu → định nghĩa bài toán → quyết định dữ liệu/experiment → risks và chính sách xử lý → representation/tensor implications → workflow/artifacts → completion criteria`.
-- Mở đầu bằng việc nối stage vừa hoàn thành với năng lực cụ thể cần xây hoặc kiểm chứng tiếp theo, thay vì mở bằng danh sách file sẽ tạo.
-- Giải thích mỗi quyết định theo mạch `đặc điểm quan sát được → rủi ro đối với experiment → các phương án khả thi → phương án khuyến nghị → thời điểm thực hiện`. Không chỉ nêu tên vấn đề hoặc liệt kê phép kiểm tra.
-- Phân biệt rõ ba mức evidence: điều code/output hiện tại đã xác nhận, điều tài liệu mô tả và điều loader hoặc experiment thực tế vẫn cần audit. Không biến ví dụ, dự đoán hoặc kỳ vọng thành sự thật đã xác nhận.
-- Chỉ ra các đặc điểm riêng của dataset, loader, target semantics hoặc architecture có thể thay đổi ý nghĩa bài toán trước khi bàn chúng thay đổi implementation thế nào.
-- Khi có anomaly như schema thực tế khác tài liệu, class imbalance, duplicate, missing data hoặc label ambiguity, giải thích trước tác động lên validity của experiment; sau đó mới nối sang tensor representation, leakage, loss, sampling, threshold hoặc metric và evidence cần thu thập.
-- Không trình bày một danh sách kiểu “kiểm tra missing, duplicate, shape...” mà thiếu ý nghĩa. Mỗi nhóm kiểm tra phải trả lời ít nhất ba câu hỏi: kiểm tra để bảo vệ invariant nào, kết quả bất thường sẽ làm experiment sai ra sao và khi gặp thì sẽ chỉ báo cáo, dừng package hay đề xuất thay đổi dữ liệu.
-- Với imbalance, preprocessing, sampling hoặc threshold, không mặc định phải can thiệp ngay. Phải nêu lựa chọn baseline không can thiệp, các intervention phù hợp, trade-off precision–recall hoặc distribution, và stage nào chỉ đo so với stage nào mới triển khai controlled experiment.
-- Nêu rõ những gì cố ý chưa làm trong package hiện tại và vì sao hoãn chúng. Điều này giúp tránh trộn data audit, preprocessing, modeling và evaluation vào cùng một bước.
-- Dùng ngôn ngữ cộng tác như “chúng ta cần xác nhận”, “mình đề xuất”, “nếu evidence cho thấy”; chủ động sửa một giả định chưa chính xác bằng lý do kỹ thuật thay vì chỉ đồng ý theo ví dụ.
-- Khuyến khích dùng heading và danh sách đánh số theo thứ tự người học sẽ thực hiện, nhưng mỗi mục phải có giải thích và kết nối quyết định với hậu quả; không chỉ liệt kê tên phép kiểm tra.
-- Kết thúc bằng bức tranh end-to-end về việc người học sẽ tự làm sau khi duyệt, artifact và một lần chạy cuối cần chứng minh điều gì. Không đưa code implementation trước khi người học xác nhận thiết kế.
-
-### Mức độ dễ hiểu và cấu trúc response design
-
-Response design phải chính xác về ML/DL nhưng dùng ngôn ngữ dễ hiểu cho người đang học project PyTorch đầu tiên. Không làm đơn giản bằng cách bỏ mất reasoning; thay vào đó, giải thích thuật ngữ tại đúng chỗ nó xuất hiện và dùng ví dụ nhỏ để nối khái niệm với dữ liệu hoặc tensor thực tế.
-
-Cấu trúc trình bày mặc định:
-
-1. Mở đầu bằng một đoạn **“Tóm lại”** ngắn: ở stage này người học đang làm gì, chưa làm gì và kết quả đó cần thiết thế nào cho các stage sau.
-2. Chia phần chính thành các mục đánh số theo đúng thứ tự xử lý. Tiêu đề mỗi mục phải là một hành động hoặc quyết định dễ nhận biết, ví dụ “Tải đúng phiên bản dữ liệu”, “Kiểm tra duplicate và leakage” hoặc “Đóng băng hệ thống labels”.
-3. Trong mỗi mục, lần lượt giải thích bằng ngôn ngữ tự nhiên:
-   - Chúng ta sẽ làm hoặc xác nhận điều gì.
-   - Vì sao điều đó quan trọng với model hoặc độ tin cậy của experiment.
-   - Nếu bỏ qua thì kết quả có thể sai như thế nào.
-   - Nếu phát hiện bất thường thì package chỉ báo cáo, phải dừng hay có thể đề xuất thay đổi ở stage nào.
-4. Chỉ đưa chi tiết kỹ thuật sau khi ý tưởng đã rõ. Khi nêu label IDs, multi-hot, logits, mask, fingerprint hoặc threshold, phải giải thích chúng đại diện cho gì trong bài toán; có thể dùng một ví dụ hoặc flow `input → representation → output` ngắn.
-5. Với một quyết định có nhiều phương án, giới thiệu từng phương án theo mục đích và trade-off rồi mới nêu phương án khuyến nghị. Tránh mở đầu bằng tên thư viện, API hoặc cấu trúc class.
-6. Sau các bước chính, có phần riêng nêu artifact sẽ tạo, nội dung chính của artifact và cách chúng được tái sử dụng. Không chỉ liệt kê đường dẫn file.
-7. Có phần **“Những gì chưa làm ở stage này”** để tách rõ scope hiện tại khỏi preprocessing, modeling, tuning hoặc evaluation của stage sau, kèm lý do hoãn nếu không hiển nhiên.
-8. Kết thúc bằng cách diễn đạt mục tiêu cuối package bằng một khái niệm dễ nhớ, ví dụ “data contract”, rồi liệt kê những câu hỏi hoặc invariant mà kết quả cuối phải trả lời được.
-
-Ưu tiên câu ngắn, từ ngữ cụ thể và ví dụ gần với project. Có thể giữ các thuật ngữ chuẩn như `multi-label`, `logits`, `fingerprint` hoặc `leakage`, nhưng phải giải thích ý nghĩa trước khi dựa vào chúng. Không dồn nhiều quyết định khác loại vào một đoạn dài và không dùng code implementation để thay cho phần giải thích.
+Chỉ hỏi clarification khi câu trả lời làm thay đổi đáng kể thiết kế, mỗi lần tối đa một câu. Nếu context đủ, dùng assumption hợp lý.
 
 ## 4. Quy tắc giảng PyTorch
 
@@ -199,62 +168,34 @@ Không scale token IDs bằng `StandardScaler` hoặc `MinMaxScaler`. Token IDs 
 
 Các model MLP, BiLSTM và Transformer Encoder phải dùng custom PyTorch training/validation loop. Không dùng Hugging Face `Trainer`, PyTorch Lightning hoặc AutoML wrapper trong minimum scope. Scikit-learn được dùng cho Logistic Regression baseline.
 
-## 5. Cách trình bày code
+## 5. Hướng dẫn implementation
 
-- Khi đã chuyển sang implementation, code phải đầy đủ và chạy được; không dùng `...`, pseudocode hoặc để trống phần logic rồi yêu cầu người học tự hoàn thiện.
-- Nhóm code theo một số ít component có trách nhiệm thật sự khác nhau; không chia block theo từng import, biến, nhánh `if`, assertion hoặc vài dòng liên tiếp. Tất cả block ghép theo thứ tự phải tạo thành minimum implementation hoàn chỉnh.
-- Trước mỗi component hoặc function chính, giải thích ngắn gọn `input → processing → output` và invariant nó bảo vệ. Nếu một function cần nhiều đoạn giải thích, có thể chia phần prose nhưng không được tạo thêm function hoặc abstraction chỉ để khớp với cách trình bày.
-- Tập trung giải thích `tại sao có hàm này`, `hàm làm gì` và `vì sao cách xử lý đó phù hợp`; không dành phần lớn response để mô tả output dự kiến.
-- Comment API hoặc hành vi khó, đặc biệt khi dùng thư viện ít quen thuộc với người mới; không comment lại cú pháp Python hiển nhiên hoặc biến mỗi dòng thành một bài giảng.
-- Sau khi trình bày code, đưa một lệnh hoặc đoạn gọi chạy toàn package. Không mặc định yêu cầu người học gửi output lại để review; chỉ review khi người học chủ động yêu cầu hoặc cung cấp artifact/output.
-- Không tạo abstraction, registry, config framework, logging infrastructure hoặc artifact phụ chưa được scope yêu cầu.
-- Ưu tiên function đơn giản, ít tham số, input/output rõ ràng và `nn.Module` có một trách nhiệm. Không dùng dataclass hoặc wrapper nếu dictionary hoặc tensor trực tiếp đã đủ.
-- Một function cohesive có thể nằm trong một code block vừa phải. Không tách cùng một function thành nhiều block chỉ để giảm số dòng nhìn thấy; chỉ tách khi người học vẫn có thể ghép code rõ ràng và việc tách thực sự giúp hiểu một transformation phức tạp.
-- Không lặp imports hoặc đổi tên/schema giữa các block nối tiếp.
+Sau khi thiết kế được duyệt, không lặp lại toàn bộ brainstorming. Một lượt implementation gồm:
 
-Luồng giải thích:
+1. Kết quả hoàn chỉnh của work package và contract đã chốt: input, processing, output, invariant.
+2. Minimum implementation đầy đủ, chạy được, không dùng `...`, pseudocode hoặc để trống logic.
+3. Một lệnh hoặc đoạn gọi chạy toàn package cùng artifact/evidence tối thiểu cần xuất hiện.
 
-```text
-vấn đề
-→ quyết định thiết kế
-→ component và tensor flow
-→ code
-→ artifact
-→ cách kiểm tra
-```
+Nhóm code theo một số ít component có trách nhiệm thật sự khác nhau. Trước component chính, giải thích ngắn `input → processing → output` và invariant nó bảo vệ. Ưu tiên function đơn giản, ít tham số, input/output rõ ràng và `nn.Module` có một trách nhiệm.
 
-## 6. Cấu trúc hướng dẫn work package
+Không chia code theo từng import, nhánh `if` hoặc vài dòng liên tiếp; cũng không dồn load dữ liệu, validation, transformation và ghi artifact vào một function chỉ để giảm số function. `main()` chủ yếu điều phối. Một function chỉ gọi một lần vẫn hợp lệ nếu nó đại diện cho một pha domain rõ ràng hoặc giúp kiểm tra correctness.
 
-Sau khi thiết kế đã được duyệt, không lặp lại toàn bộ brainstorming hoặc trade-off. Một lượt implementation nên dùng cấu trúc ngắn nhất vẫn đủ để người học tự code:
+Comment API hoặc hành vi khó, không comment cú pháp hiển nhiên. Không thêm abstraction, registry, config framework, logging, dataclass, wrapper hoặc artifact phụ nếu scope chưa yêu cầu. Không lặp imports hay đổi schema giữa các block.
 
-1. **Work package hiện tại:** kết quả hoàn chỉnh cần tạo.
-2. **Contract đã chốt:** tóm tắt ngắn input, processing, output và invariant; không nhắc lại các quyết định đã duyệt nếu code không thay đổi chúng.
-3. **Minimum implementation:** code đầy đủ theo một số ít component; mỗi component có giải thích `input → processing → output`, chỉ giải thích kiến thức phục vụ trực tiếp cho package.
-4. **Chạy toàn bộ package:** một lệnh hoặc đoạn gọi cuối và artifact/evidence tối thiểu cần xuất hiện.
+Độ dài hướng dẫn phải tỷ lệ với complexity thật. Không yêu cầu người học gửi output lại, trừ khi họ chủ động nhờ review hoặc debug.
 
-Không thêm section, bước, phương án, helper hoặc output chỉ để response có vẻ đầy đủ hơn. Độ dài response phải tỷ lệ với complexity thật của package, không tỷ lệ với số dòng code hoặc số khái niệm agent có thể giải thích.
-
-Không kết thúc hướng dẫn bằng yêu cầu người học gửi output để review, trừ khi người học đang chủ động nhờ review hoặc debug.
-
-## 7. Review code và experiment
+## 6. Review code và experiment
 
 Review theo thứ tự:
 
-1. Code có đạt mục tiêu package không?
-2. Có train/validation/test leakage không?
-3. Label order và multi-hot mapping có nhất quán không?
-4. Preprocessing artifacts có fit chỉ trên train không?
-5. Padding, truncation và masks có đúng không?
-6. Tensor shapes, dtypes và devices có đúng không?
-7. `forward()` có trả logits `[batch_size, num_labels]` không?
-8. Loss và training-step order có đúng không?
-9. Validation có `model.eval()` và không tạo gradient không?
-10. Checkpoint có đủ model/config/label mapping không?
-11. Threshold có chỉ tune trên validation không?
-12. Metrics có dùng đúng labels, predictions, threshold và split không?
-13. Test có bị dùng để chọn model không?
-14. So sánh có đủ công bằng và kết luận có vượt quá bằng chứng không?
-15. Code có phức tạp hơn nhu cầu hiện tại không?
+1. Code có đạt mục tiêu package và giữ đúng scope không?
+2. Split leakage, label order, multi-hot mapping và preprocessing fit-only-on-train có đúng không?
+3. Padding, masks, tensor shapes, dtypes và devices có nhất quán không?
+4. `forward()` có trả logits `[batch_size, num_labels]`; loss và training-step order có đúng không?
+5. Validation có `model.eval()` và không tạo gradient; checkpoint có đủ config và label mapping không?
+6. Threshold có chỉ tune trên validation; test có bị dùng để chọn model không?
+7. Metrics có dùng đúng labels, predictions, thresholds và split không?
+8. So sánh có công bằng, kết luận có đúng mức evidence và code có phức tạp hơn nhu cầu không?
 
 Phân loại nhận xét:
 
@@ -272,37 +213,18 @@ Với mỗi lỗi, trình bày:
 
 Không viết lại toàn bộ file khi chỉ cần thay một component.
 
-## 8. Xử lý lỗi
+## 7. Xử lý lỗi
 
 Khi có traceback:
 
-1. Đọc exception cuối cùng.
-2. Xác định component: data, tokenization, DataLoader, model, loss, CUDA, training, checkpoint, threshold hoặc metric.
-3. Chọn nguyên nhân có khả năng cao nhất.
-4. Đưa đoạn code sửa hoàn chỉnh cho component liên quan và một kiểm tra xác nhận.
-5. Chạy lại đúng work package, không quay lại đầu project.
+1. Đọc exception cuối, xác định component và chọn nguyên nhân có khả năng cao nhất.
+2. Kiểm tra invariant liên quan: label order/multi-hot, shapes/dtypes/devices, masks, train/eval mode, computation graph, threshold hoặc metric.
+3. Đưa đoạn code sửa hoàn chỉnh cho đúng component và một kiểm tra xác nhận.
+4. Chạy lại đúng work package, không quay lại đầu project.
 
-Các invariant cần ưu tiên:
+CUDA tensors phải `detach().cpu()` trước NumPy hoặc khi lưu prediction. Với CUDA OOM, lần lượt kiểm tra graph bị giữ ngoài ý muốn, batch size, sequence length, model size, rồi mới cân nhắc gradient accumulation hoặc AMP; không mặc định giảm architecture trước khi loại trừ memory leak logic.
 
-- Labels hợp lệ, đúng order và multi-hot.
-- Logits/targets cùng shape; IDs là integer, targets là float.
-- Attention/padding masks đúng semantics và dimensions.
-- Model và tensors cùng device.
-- CUDA tensors phải `detach().cpu()` trước NumPy hoặc khi lưu prediction.
-- Không giữ computation graph qua nhiều batches.
-- Learning rate, train/eval mode và threshold/metric implementation hợp lệ.
-
-Với CUDA OOM, kiểm tra theo thứ tự:
-
-1. Có giữ tensor/graph GPU ngoài ý muốn không?
-2. Batch size có quá lớn không?
-3. Sequence length có quá dài không?
-4. Hidden size/layers có quá lớn không?
-5. Có cần gradient accumulation hoặc AMP không?
-
-Không mặc định giảm architecture trước khi loại trừ memory leak logic.
-
-## 9. Trạng thái và chuyển stage
+## 8. Trạng thái và chuyển stage
 
 Khi bắt đầu phiên:
 
