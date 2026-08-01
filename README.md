@@ -1,16 +1,16 @@
 # Comparative Study of PyTorch Neural Architectures for Multi-label Emotion Classification
 
-Project nghiên cứu bài toán **multi-label emotion classification** trên GoEmotions. Trọng tâm là tự xây dựng và huấn luyện các neural architecture bằng PyTorch, sau đó thực hiện controlled experiments, metric analysis và error analysis để tạo báo cáo đồ án có thể tái lập.
+Project nghiên cứu bài toán **multi-label emotion classification** trên GoEmotions. Trọng tâm là so sánh có kiểm soát một classical baseline với ba neural architecture train từ đầu bằng PyTorch, sau đó phân tích chất lượng, chi phí và failure modes.
+
+Nguyên tắc xuyên suốt là **research-first, minimum implementation**: chỉ viết code cần để bảo vệ tính hợp lệ của experiment hoặc trả lời trực tiếp một research question. Không biến mỗi phép kiểm tra, metric hoặc artifact thành một helper/file riêng.
 
 ```text
-raw text and labels
-→ data audit and EDA
-→ preprocessing and vocabulary
-→ Dataset/DataLoader
-→ neural architectures and custom training loop
-→ threshold and imbalance experiments
-→ controlled comparison and error analysis
-→ final report
+GoEmotions contract và data analysis
+→ TF-IDF baseline
+→ shared PyTorch data/training/evaluation pipeline
+→ MLP, BiLSTM, Transformer experiments
+→ imbalance và threshold experiments
+→ controlled comparison, error analysis và final report
 ```
 
 ## Current Status
@@ -20,198 +20,162 @@ raw text and labels
 <!-- CURRENT_STATUS_START -->
 
 - **Project state:** In progress
-- **Current stage:** Stage 1 — GoEmotions dataset audit and problem formulation
-- **Current work package:** Work Package 1 — Load, audit and validate GoEmotions; freeze splits and label mapping
-- **Reusable work from previous project:** Người học đã hoàn thành project MT vs LLM, có kinh nghiệm thiết kế evaluation set, chạy experiment có schema thống nhất, so sánh model và viết final technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Brainstorm và chốt thiết kế package audit GoEmotions trước khi viết code: dataset configuration, schema, official splits, data-quality checks, label order, multi-hot example và artifact outputs
-- **Evidence required to complete current package:** Dataset config/schema và split sizes từ loader thực tế; missing/empty/duplicate statistics; label names/order; một multi-hot target đúng shape và `float32`; dataset summary cùng label mapping artifacts được lưu
+- **Current stage:** Stage 1 — Data contract and analysis
+- **Completed with current evidence:** Stage 0 đã được xác nhận bằng environment smoke check. Stage 1 audit đã chạy thành công và tạo `data/artifacts/dataset_contract.json`: 28 ordered labels, mọi data-quality blocking count bằng 0, official splits được giữ nguyên, primary clean views có 43,410 train / 5,383 validation / 5,385 test rows và `validation.status = passed`.
+- **Current work package:** Phân tích và visualize dữ liệu để chốt các quyết định preprocessing và phạm vi phân tích trước TF-IDF baseline
+- **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
+- **Next action:** Tạo một data-analysis notebook/note dùng clean views để mô tả label frequency, label cardinality và text length; từ evidence đó chốt preprocessing boundary, không can thiệp imbalance ở Stage 1
+- **Evidence required to complete current package:** Notebook/note chạy được, có các bảng/biểu đồ tối thiểu và ghi rõ observed findings, risks cùng decisions sẽ áp dụng cho Stage 2–3
+- **Current evidence gap:** Chưa có data-analysis notebook/note hoặc preprocessing decisions; vì vậy Stage 1 chưa hoàn thành
 - **Blockers:** None
-- **Last updated:** 2026-07-30
+- **Last updated:** 2026-08-02
 
 ### Stage progress
 
-- [x] Stage 0 — Environment, repository and experiment contract
-- [ ] Stage 1 — GoEmotions dataset audit and problem formulation
-- [ ] Stage 2 — Exploratory data analysis and preprocessing design
-- [ ] Stage 3 — TF-IDF and Logistic Regression baseline
-- [ ] Stage 4 — PyTorch data pipeline
-- [ ] Stage 5 — Mean Pooling MLP neural baseline
-- [ ] Stage 6 — BiLSTM with Attention
-- [ ] Stage 7 — Transformer Encoder
-- [ ] Stage 8 — Imbalance, threshold and ablation experiments
-- [ ] Stage 9 — Reproducibility, efficiency and controlled comparison
-- [ ] Stage 10 — Error analysis and final report
+- [x] Stage 0 — Environment and repository setup
+- [ ] Stage 1 — Data contract and analysis
+- [ ] Stage 2 — TF-IDF + Logistic Regression baseline
+- [ ] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
+- [ ] Stage 4 — BiLSTM + Attention and Transformer Encoder
+- [ ] Stage 5 — Imbalance and threshold experiments
+- [ ] Stage 6 — Final controlled comparison, error analysis and report
 
 <!-- CURRENT_STATUS_END -->
 
-## 1. Project Goals
+## 1. Research Goals
 
-Xây dựng một experimental pipeline để:
-
-- Hiểu sâu PyTorch: tensor, `Dataset`, `DataLoader`, `nn.Module`, autograd, custom training loop và checkpoint.
-- So sánh classical baseline với ba neural architecture train từ đầu.
-- Đánh giá ảnh hưởng của architecture, class imbalance và threshold strategy.
-- So sánh quality với parameter count, runtime và GPU memory.
-- Tạo error analysis và báo cáo có thể truy vết đến từng experiment.
-
-Project không chỉ tối ưu điểm số; mục tiêu chính là hiểu và chứng minh được toàn bộ vòng đời của một NLP experiment.
-
-## 2. Research Questions
+Project phải trả lời các câu hỏi sau:
 
 1. Neural models có cải thiện so với TF-IDF + Logistic Regression không?
 2. Mean Pooling MLP, BiLSTM + Attention và Transformer Encoder khác nhau thế nào về macro-F1 và micro-F1?
 3. Sequence models có lợi thế trên câu dài, negation hoặc sample có nhiều emotion labels không?
 4. `pos_weight` ảnh hưởng thế nào đến precision, recall và F1 của label hiếm?
 5. Global hoặc per-label threshold có tốt hơn threshold `0.5` không?
-6. Model phức tạp hơn có đáng đổi lấy chi phí train, số parameter và GPU memory lớn hơn không?
-7. Các failure mode chính có liên quan đến sarcasm, negation, ambiguity hay label correlation không?
+6. Model phức tạp hơn có đáng đổi lấy parameter count, training time và GPU memory lớn hơn không?
+7. Những failure mode chính có liên quan đến sarcasm, negation, ambiguity hoặc label correlation không?
 
-Các câu hỏi này là hypothesis-driven nhưng kết quả có thể bác bỏ dự đoán ban đầu.
+Kết quả có thể bác bỏ giả thuyết ban đầu. Không thêm model, metric hoặc ablation nếu chúng không giúp trả lời một trong các câu hỏi trên.
 
-## 3. Task and Dataset
+## 2. Task and Systems
 
-### Dataset
+### Problem contract
 
-- GoEmotions, ưu tiên official simplified configuration nếu loader hiện tại hỗ trợ.
-- Dùng official train/validation/test split.
-- Stage đầu phải audit schema thực tế thay vì dựa vào tutorial.
+- Input: một câu tiếng Anh.
+- Output: một tập emotion labels; một sample có thể có nhiều positive labels.
+- Đây là bài toán **multi-label**, không phải multi-class.
+- Target có dtype `float32` và shape `[num_labels]`.
+- Model trả logits `[batch_size, num_labels]`.
+- `sigmoid(logits)` tạo probabilities; threshold tạo binary predictions.
+- Loss neural mặc định là `torch.nn.BCEWithLogitsLoss()`; không đặt sigmoid trong `forward()`.
 
-### Input and output
+### Systems bắt buộc
 
-Input là một câu tiếng Anh. Output là một tập emotion labels; một sample có thể có nhiều positive labels.
-
-Đây là bài toán **multi-label**, không phải multi-class:
-
-- Mỗi label là một binary target độc lập.
-- Target là multi-hot `float32` với shape `[num_labels]`.
-- Model trả logits với shape `[batch_size, num_labels]`.
-- Sigmoid chuyển logits thành probabilities.
-- Threshold chuyển probabilities thành binary predictions.
-
-Loss mặc định:
-
-```python
-torch.nn.BCEWithLogitsLoss()
-```
-
-Không đặt sigmoid trong `forward()` khi train bằng `BCEWithLogitsLoss`.
-
-## 4. Systems Compared
-
-| System | Pipeline | Vai trò |
+| System | Pipeline | Vai trò nghiên cứu |
 |---|---|---|
 | `tfidf_logreg` | TF-IDF → One-vs-Rest Logistic Regression | Classical baseline |
 | `mean_pooling_mlp` | Embedding → masked mean pooling → MLP | Neural baseline đơn giản |
 | `bilstm_attention` | Embedding → BiLSTM → attention pooling | Sequence model |
 | `transformer_encoder` | Embedding + positional encoding → Transformer Encoder → masked pooling | Self-attention model |
-| `distilbert_finetuned` | Pretrained DistilBERT → classifier | Optional extension |
 
-DistilBERT chỉ được thực hiện sau khi bốn system chính và report sơ bộ đã hoàn thành.
+Pretrained models và các architecture khác nằm ngoài minimum scope.
 
-## 5. Experimental Contract
+## 3. Experimental Contract
 
-### Data and leakage
+### Data contract
+
+- Dùng GoEmotions official simplified configuration và official train/validation/test splits.
+- Audit schema từ loader thực tế; không hard-code row count hoặc label count từ tutorial làm điều kiện pass.
+- Ghi dataset fingerprint, split sizes, columns và ordered label names vào một artifact duy nhất: `data/artifacts/dataset_contract.json`.
+- `label_names[index]` là mapping chuẩn từ ID sang tên; mọi target, logit, prediction, threshold và metric dùng cùng thứ tự này. Không lưu hai mapping JSON ngược nhau.
+- Không sửa, loại hoặc di chuyển sample trong Stage 1. Nếu cần thay đổi dữ liệu sau audit, phải ghi thành một quyết định nghiên cứu riêng.
+
+Audit tối thiểu chỉ kiểm tra các rủi ro có thể làm experiment sai:
+
+- **Dừng:** thiếu official split/column, schema labels không nhất quán, missing/empty text hoặc labels, label ID không hợp lệ, label ID lặp trong một row, exact duplicate text giữa các splits.
+- **Chỉ báo cáo:** exact duplicate text trong cùng split và các thống kê phân phối phục vụ EDA.
+
+Không tạo multi-hot example ở Stage 1. Shape, dtype và label mapping của multi-hot target được kiểm tra một lần trên inspected batch khi xây PyTorch `Dataset`/`DataLoader` ở Stage 3.
+
+### Leakage and selection
 
 - Không gộp validation hoặc test vào train.
 - Vocabulary, TF-IDF và `pos_weight` chỉ được fit/tính từ train.
 - Hyperparameter, checkpoint và threshold chỉ được chọn bằng validation.
-- Test chỉ được dùng cho final evaluation sau khi config đã chốt.
-- Kiểm tra missing text, invalid labels và duplicate text trong/giữa splits.
+- Test chỉ được dùng sau khi config và threshold đã đóng băng.
+- Primary selection metric là validation macro-F1; luôn báo cáo micro-F1 song song.
+- Không chọn seed tốt nhất làm kết quả chính.
 
-### Label representation
+### Controlled comparison
 
-- Giữ một label order cố định cho toàn project.
-- Lưu `label_to_id.json` và `id_to_label.json`.
-- Mọi target, logits, prediction, metric và threshold artifact phải dùng cùng label order.
+Giữ cố định giữa các neural architectures khi hợp lý:
 
-### Model selection and thresholds
+- Data splits, label order, vocabulary/tokenization và maximum sequence length.
+- Evaluation code, loss/threshold của comparison chính, hardware và early-stopping policy.
+- Batch size có thể khác vì memory nhưng phải được báo cáo.
 
-- Primary selection metric: validation macro-F1.
-- Luôn báo cáo micro-F1 song song.
-- So sánh threshold cố định `0.5`, tuned global threshold và tuned per-label thresholds.
-- Threshold chỉ được tune trên validation probabilities và đóng băng trước test evaluation.
+Kết quả là practical system comparison, không được diễn giải như causal architecture ablation nếu model capacity hoặc optimization khác nhau.
 
-### Seeds and comparison
+Chỉ chạy các seed `13, 42, 2026` sau khi mỗi architecture đã có một config ổn định. Exploratory runs không cần chạy nhiều seed.
 
-Stability seeds mặc định:
+## 4. Minimum Evaluation
 
-```text
-13, 42, 2026
-```
+Chỉ tính các kết quả cần cho research questions:
 
-Chỉ chạy nhiều seeds sau khi config chính đã ổn định. Nếu kết luận architecture nào tốt hơn, final comparison phải có nhiều seeds cho từng neural architecture được so sánh; single-run result chỉ được xem là exploratory.
+- **Model selection:** validation macro-F1.
+- **Overall quality:** macro precision/recall/F1 và micro precision/recall/F1.
+- **Rare-label analysis:** per-label support, precision, recall và F1.
+- **Threshold study:** so sánh fixed `0.5`, tuned global và tuned per-label thresholds; chỉ tune trên validation.
+- **Research slices:** text length, label cardinality và các nhóm negation/ambiguity có đủ evidence.
+- **Efficiency:** trainable parameter count, total training time và peak GPU memory trên cùng setup.
+- **Final stability:** mean và standard deviation qua ba seeds cho các neural architectures.
 
-Khi so sánh architectures, giữ cố định khi có thể:
+Không mặc định tính weighted-F1, samples-F1, Hamming loss, exact match, PR-AUC hoặc inference benchmark. Chỉ bổ sung khi final analysis cho thấy một metric đó cần để giải thích kết quả.
 
-- Data splits, label mapping và vocabulary/tokenizer.
-- Maximum sequence length.
-- Loss và threshold strategy của architecture experiment chính.
-- Evaluation code, hardware và early-stopping policy.
+## 5. Minimum Implementation Rules
 
-Batch size có thể khác do memory nhưng phải được báo cáo. Kết quả là practical system comparison, không phải causal architecture ablation nếu model capacity hoặc optimization khác nhau.
+### Một trách nhiệm chỉ có một nguồn sự thật
 
-### Reproducibility metadata
+- Dataset audit chỉ chạy đầy đủ ở Stage 1. Các stage sau đọc contract đã đóng băng và chỉ kiểm tra nhanh boundary mà chúng trực tiếp phụ thuộc.
+- Multi-hot shape/dtype/mapping chỉ smoke-check ở Stage 3, không tạo example artifact riêng và không lặp lại ở từng model.
+- Tất cả neural models dùng chung data pipeline, training loop, evaluation code và checkpoint format.
+- Tất cả threshold experiments dùng cùng validation probabilities đã lưu; không forward model lại cho từng threshold.
+- Final tables và figures được tạo từ run outputs, không nhập tay lại kết quả.
 
-Mỗi run cần lưu tối thiểu:
+### Chỉ tách code khi có boundary thật
 
-```text
-run_id, model_name, seed, config
-dataset name/config/fingerprint
-git commit
-start/end time, best epoch, best validation metric
-checkpoint path, parameter count, runtime, peak GPU memory
-```
+- Một work-package script mặc định nằm trong một file.
+- `main()` điều phối; function riêng chỉ dành cho một pha có input/output hoặc invariant độc lập.
+- Không tạo helper để bọc một thao tác, rút ngắn code block hoặc kiểm tra lại output vừa được tạo.
+- Không tạo class nếu function và plain dictionary đã đủ.
+- Không thêm registry, factory, dataclass, config framework, logging framework, caching, CLI nhiều tầng hoặc report generator trong minimum scope.
+- Một file mới chỉ hợp lý khi logic được dùng lại giữa nhiều experiments, là implementation độc lập của một model, hoặc là artifact bắt buộc.
 
-Không chọn seed tốt nhất làm kết quả chính và không đổi config giữa một multi-seed experiment.
+Với Stage 1, một script gồm các pha `load contract → audit rows/splits → write artifact → main` là đủ. Có thể gộp các pha nếu data flow vẫn rõ; không cần function riêng cho từng counter, mapping, assertion hoặc example.
 
-## 6. Evaluation
+### Artifact policy
 
-### Overall metrics
+- Lưu artifact cần để tái lập kết quả hoặc thực hiện stage sau; không lưu output chỉ để chứng minh một dòng code hoạt động.
+- Debug và exploratory runs có thể bị ghi đè. Chỉ giữ checkpoint/output của candidate được chọn và final multi-seed runs.
+- Mỗi final run cần một record duy nhất chứa: model, seed, config, dataset fingerprint, best epoch, validation metric, parameter count, runtime, peak GPU memory và checkpoint/prediction paths.
+- Checkpoint neural phải đủ để load model với vocabulary và ordered label names tương ứng.
 
-- Micro precision, recall và F1.
-- Macro precision, recall và F1.
-- Weighted F1 và samples-F1.
-- Hamming loss và exact-match ratio.
-- Micro PR-AUC và macro PR-AUC khi hợp lệ.
+## 6. Implementation Roadmap
 
-### Per-label metrics
-
-- Support, precision, recall, F1 và selected threshold.
-- PR-AUC khi label có đủ positive và negative samples.
-
-### Slice analysis
-
-- Label frequency.
-- Text length.
-- Label cardinality.
-- Representative error categories.
-
-### Efficiency
-
-- Trainable parameter count.
-- Time per epoch và total training time.
-- Peak GPU memory.
-- Inference latency hoặc throughput trên cùng setup.
-
-## 7. Implementation Roadmap
-
-| Stage | Mục tiêu | Artifact chính |
+| Stage | Câu hỏi cần giải quyết | Minimum output |
 |---|---|---|
-| 0 | Environment và reproducibility setup | Environment summary, dependency file, seed utility |
-| 1 | Audit GoEmotions và đóng băng experiment contract | Dataset summary, split table, label mappings |
-| 2 | EDA và preprocessing decisions | Figures, label/text statistics, preprocessing note |
-| 3 | TF-IDF + Logistic Regression | Baseline model, predictions và metrics |
-| 4 | Vocabulary, `Dataset`, `collate_fn`, `DataLoader` | Vocabulary artifact và inspected batch |
-| 5 | Mean Pooling MLP và custom training loop | Checkpoint, curves, validation metrics |
-| 6 | BiLSTM + Attention | Checkpoint, attention validation, comparison |
-| 7 | Transformer Encoder | Checkpoint, mask validation, comparison |
-| 8 | `pos_weight`, threshold và controlled ablations | Loss/threshold tables và artifacts |
-| 9 | Multiple seeds và efficiency benchmark | Mean ± std, runtime/GPU comparison |
-| 10 | Error analysis và final report | Error taxonomy, figures, final report |
+| 0 | Environment có chạy đúng không? | Dependency file và một environment smoke check |
+| 1 | Dữ liệu thực tế có đủ tin cậy để nghiên cứu không? | Một audit script, `dataset_contract.json` và data-analysis notebook/note |
+| 2 | Classical baseline đạt mức nào? | Validation/test predictions và metrics của TF-IDF + Logistic Regression |
+| 3 | Shared PyTorch pipeline có đúng và neural baseline học được không? | Inspected batch, shared training loop, MLP checkpoint và metrics |
+| 4 | Sequence và self-attention models khác MLP thế nào? | BiLSTM/Transformer checkpoints, predictions và metrics |
+| 5 | Imbalance handling và threshold strategy thay đổi kết quả thế nào? | Models/predictions cần thiết và một bảng controlled experiments; threshold được chọn từ validation predictions |
+| 6 | Kết luận cuối có ổn định và trả lời research questions không? | Multi-seed comparison, efficiency/error analysis và final report |
 
-Mỗi stage chỉ tạo file khi thực sự cần. Không scaffold toàn bộ source tree từ đầu.
+Stage là research milestone, không phải yêu cầu tạo package hoặc folder riêng. Không scaffold toàn bộ source tree từ đầu.
 
-## 8. Project Structure
+## 7. Suggested Minimal Structure
+
+Chỉ tạo path khi stage tương ứng cần đến:
 
 ```text
 pytorch-multilabel-emotion/
@@ -219,32 +183,20 @@ pytorch-multilabel-emotion/
 ├── README.md
 ├── requirements.txt
 ├── check_env.py
-├── configs/
 ├── data/
+│   ├── audit_goemotions.py
 │   └── artifacts/
-├── notebooks/
-├── src/
-└── outputs/
-    ├── checkpoints/
-    ├── metrics/
-    ├── figures/
-    └── reports/
+│       └── dataset_contract.json
+├── notebooks/                 # data analysis hoặc narrative exploration
+├── src/                       # shared code sau khi Stage 2/3 thực sự cần
+└── outputs/                   # selected/final run artifacts và final report
 ```
 
-- Notebook dùng cho exploration, visualization và narrative analysis.
-- `src/` dùng cho logic cần chạy lại.
-- Không commit raw data hoặc checkpoint lớn.
-- Metrics, config và report phải truy ngược được đến run.
+Không bắt buộc tạo sẵn `configs/`, nhiều output subfolders hoặc một file cho mỗi metric/model. Cấu trúc được mở rộng khi có artifact thật, không mở rộng để dự phòng.
 
-## 9. Environment
+## 8. Environment
 
-Stack chính:
-
-- Python 3.12.
-- PyTorch.
-- pandas, NumPy và scikit-learn.
-- Hugging Face `datasets`.
-- Matplotlib, tqdm và Jupyter.
+Stack chính: Python 3.12, PyTorch, Hugging Face `datasets`, pandas, NumPy, scikit-learn, Matplotlib, tqdm và Jupyter.
 
 Setup trên Windows PowerShell:
 
@@ -255,24 +207,21 @@ python -m pip install -r requirements.txt
 python check_env.py
 ```
 
-Environment hiện tại dùng PyTorch `2.13.0+cu132` với RTX 5060 Ti 16GB. Khi tái tạo trên máy khác, CUDA wheel phải phù hợp với driver/GPU của máy đó.
+Environment hiện tại dùng PyTorch `2.13.0+cu132` với RTX 5060 Ti 16GB. CUDA wheel phải phù hợp với driver/GPU của máy chạy.
 
-Không bắt buộc dùng PyTorch Lightning, Hugging Face `Trainer`, W&B, Hydra hoặc Optuna trong minimum project.
+Neural models dùng custom PyTorch training/validation loop. Không dùng Hugging Face `Trainer`, PyTorch Lightning, W&B, Hydra, Optuna hoặc AutoML trong minimum project.
 
-## 10. Definition of Done
+## 9. Definition of Done
 
-Project chỉ hoàn thành khi có bằng chứng cho tất cả mục sau:
+Project hoàn thành khi có evidence cho các kết quả sau, không phụ thuộc vào số file hoặc số dòng code:
 
-- Dataset audit, EDA report và label mappings cố định.
-- TF-IDF + Logistic Regression baseline.
-- Custom PyTorch `Dataset`, dynamic-padding `collate_fn` và `DataLoader`.
-- Mean Pooling MLP, BiLSTM + Attention và Transformer Encoder được train bằng custom loop.
-- Standard BCE và `pos_weight` experiment.
-- Fixed/global/per-label threshold comparison.
-- Overall, per-label, learning-curve và efficiency results.
-- Multiple-seed results cho final neural comparison.
-- Slice analysis và representative error taxonomy.
-- Final report trả lời research questions, methodology, results, limitations và conclusion.
+- Dataset contract và data-analysis decisions đã đóng băng.
+- TF-IDF + Logistic Regression baseline đã được đánh giá.
+- Shared PyTorch data/training/evaluation pipeline chạy đúng.
+- Mean Pooling MLP, BiLSTM + Attention và Transformer Encoder đã được train và so sánh.
+- Standard BCE so với `pos_weight`, cùng fixed/global/per-label threshold, đã được kiểm tra có kiểm soát.
+- Final neural comparison có ba seeds, quality metrics và efficiency measurements.
+- Error analysis và final report trả lời các research questions, nêu methodology, results, limitations và conclusion đúng mức evidence.
 - `Current Status` ghi `Project completed`.
 
 Quy tắc làm việc với agent, cách review code và cách cập nhật trạng thái nằm trong [`AGENTS.md`](AGENTS.md).

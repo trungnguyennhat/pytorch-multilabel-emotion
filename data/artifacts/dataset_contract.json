@@ -1,0 +1,254 @@
+{
+  "dataset": {
+    "source": "google-research-datasets/go_emotions",
+    "config": "simplified"
+  },
+  "schema": {
+    "required_columns": [
+      "id",
+      "labels",
+      "text"
+    ],
+    "num_labels": 28,
+    "label_names": [
+      "admiration",
+      "amusement",
+      "anger",
+      "annoyance",
+      "approval",
+      "caring",
+      "confusion",
+      "curiosity",
+      "desire",
+      "disappointment",
+      "disapproval",
+      "disgust",
+      "embarrassment",
+      "excitement",
+      "fear",
+      "gratitude",
+      "grief",
+      "joy",
+      "love",
+      "nervousness",
+      "optimism",
+      "pride",
+      "realization",
+      "relief",
+      "remorse",
+      "sadness",
+      "surprise",
+      "neutral"
+    ]
+  },
+  "official_splits": {
+    "train": {
+      "num_rows": 43410,
+      "fingerprint": "64a9acba7d611f84",
+      "columns": [
+        "text",
+        "labels",
+        "id"
+      ],
+      "data_quality": {
+        "missing_text_count": 0,
+        "empty_text_count": 0,
+        "invalid_text_type_count": 0,
+        "missing_labels_count": 0,
+        "empty_labels_count": 0,
+        "invalid_labels_container_count": 0,
+        "invalid_label_id_count": 0,
+        "repeated_label_id_row_count": 0
+      },
+      "within_split_duplicates": {
+        "duplicated_text_value_count": 118,
+        "extra_duplicate_row_count": 183
+      }
+    },
+    "validation": {
+      "num_rows": 5426,
+      "fingerprint": "f7b09ba167266538",
+      "columns": [
+        "text",
+        "labels",
+        "id"
+      ],
+      "data_quality": {
+        "missing_text_count": 0,
+        "empty_text_count": 0,
+        "invalid_text_type_count": 0,
+        "missing_labels_count": 0,
+        "empty_labels_count": 0,
+        "invalid_labels_container_count": 0,
+        "invalid_label_id_count": 0,
+        "repeated_label_id_row_count": 0
+      },
+      "within_split_duplicates": {
+        "duplicated_text_value_count": 2,
+        "extra_duplicate_row_count": 3
+      }
+    },
+    "test": {
+      "num_rows": 5427,
+      "fingerprint": "49473e93950415fe",
+      "columns": [
+        "text",
+        "labels",
+        "id"
+      ],
+      "data_quality": {
+        "missing_text_count": 0,
+        "empty_text_count": 0,
+        "invalid_text_type_count": 0,
+        "missing_labels_count": 0,
+        "empty_labels_count": 0,
+        "invalid_labels_container_count": 0,
+        "invalid_label_id_count": 0,
+        "repeated_label_id_row_count": 0
+      },
+      "within_split_duplicates": {
+        "duplicated_text_value_count": 5,
+        "extra_duplicate_row_count": 6
+      }
+    }
+  },
+  "cross_split_duplicates": {
+    "train_vs_validation": {
+      "shared_unique_text_count": 41
+    },
+    "train_vs_test": {
+      "shared_unique_text_count": 32
+    },
+    "validation_vs_test": {
+      "shared_unique_text_count": 10
+    }
+  },
+  "evaluation_policy": {
+    "name": "exact_text_disjoint_evaluation",
+    "official_splits_preserved": true,
+    "primary_evaluation_uses_clean_views": true,
+    "comparison": {
+      "field": "text",
+      "normalization": "none",
+      "case_sensitive": true
+    },
+    "splits": {
+      "train": {
+        "source_split": "train",
+        "official_num_rows": 43410,
+        "clean_num_rows": 43410,
+        "excluded_ids": []
+      },
+      "validation": {
+        "source_split": "validation",
+        "excluded_if_text_appears_in": [
+          "train"
+        ],
+        "official_num_rows": 5426,
+        "clean_num_rows": 5383,
+        "excluded_ids": [
+          "ef9wj1n",
+          "eeb38qy",
+          "ed27dh6",
+          "edaen2u",
+          "eeplo23",
+          "ee1dq73",
+          "eetf51v",
+          "ed1rhc1",
+          "edc7lxz",
+          "ef4vane",
+          "ef6ra0k",
+          "edt6rob",
+          "eep5qpp",
+          "eex9b4i",
+          "efgl5rb",
+          "edjoojz",
+          "efg0c9a",
+          "edpl1jz",
+          "edbgruk",
+          "eem6xru",
+          "edemje1",
+          "ed268zj",
+          "ed39kgk",
+          "efhcat1",
+          "ed7mh5o",
+          "ef8hmp9",
+          "ecztue6",
+          "ee6w7t2",
+          "ee0v9p8",
+          "ed1uz4r",
+          "ed72gcr",
+          "edro6qa",
+          "ee05gul",
+          "eepoxn2",
+          "ee2n22g",
+          "edzeaz7",
+          "eetl21b",
+          "edu81f4",
+          "eedkkt6",
+          "ed46tmd",
+          "edgd5wy",
+          "efed341",
+          "edtqjav"
+        ]
+      },
+      "test": {
+        "source_split": "test",
+        "excluded_if_text_appears_in": [
+          "train",
+          "validation_clean"
+        ],
+        "official_num_rows": 5427,
+        "clean_num_rows": 5385,
+        "excluded_ids": [
+          "efdbh17",
+          "edl8i5w",
+          "edw4ttk",
+          "eds7ima",
+          "edd71rs",
+          "eezvo4a",
+          "edygcq1",
+          "edjp3a4",
+          "edlk9z2",
+          "edraswx",
+          "ee2907w",
+          "ed0hkj6",
+          "edocjeg",
+          "eei9k22",
+          "ed5q5vt",
+          "edzvs4m",
+          "edy0u5j",
+          "eeqto8f",
+          "ed7gszf",
+          "edd55xz",
+          "eeb8dkc",
+          "eergs83",
+          "ee1ty3y",
+          "eem5zrr",
+          "ee3b844",
+          "eegnxi7",
+          "eczvupb",
+          "ed6w2jr",
+          "edpzdjo",
+          "ef2ycmu",
+          "ef5wsk1",
+          "eex08xg",
+          "eeinruj",
+          "efgnm4o",
+          "edeml2x",
+          "efffep1",
+          "ee8let7",
+          "ee5emrk",
+          "ed2h0l8",
+          "edzhcjf",
+          "efha0zn",
+          "efaqexv"
+        ]
+      }
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "blocking_issues": []
+  }
+}
