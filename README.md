@@ -20,20 +20,20 @@ GoEmotions contract và data analysis
 <!-- CURRENT_STATUS_START -->
 
 - **Project state:** In progress
-- **Current stage:** Stage 1 — Data contract and analysis
-- **Completed with current evidence:** Stage 0 đã được xác nhận bằng environment smoke check. Stage 1 audit đã chạy thành công và tạo `data/artifacts/dataset_contract.json`: 28 ordered labels, mọi data-quality blocking count bằng 0, official splits được giữ nguyên, primary clean views có 43,410 train / 5,383 validation / 5,385 test rows và `validation.status = passed`.
-- **Current work package:** Phân tích và visualize dữ liệu để chốt các quyết định preprocessing và phạm vi phân tích trước TF-IDF baseline
+- **Current stage:** Stage 2 — TF-IDF + Logistic Regression baseline
+- **Completed with current evidence:** Stage 0 environment smoke check đã pass. Stage 1 có audit contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385; `notebooks/goemotions_analysis.ipynb` đã tạo các kết quả về label imbalance, cardinality, text length, train–validation prevalence và label co-occurrence. Người học xác nhận phạm vi analysis hiện tại là đủ để kết thúc Stage 1.
+- **Current work package:** Thiết kế và triển khai TF-IDF + One-vs-Rest Logistic Regression làm classical baseline không can thiệp imbalance
 - **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Tạo một data-analysis notebook/note dùng clean views để mô tả label frequency, label cardinality và text length; từ evidence đó chốt preprocessing boundary, không can thiệp imbalance ở Stage 1
-- **Evidence required to complete current package:** Notebook/note chạy được, có các bảng/biểu đồ tối thiểu và ghi rõ observed findings, risks cùng decisions sẽ áp dụng cho Stage 2–3
-- **Current evidence gap:** Chưa có data-analysis notebook/note hoặc preprocessing decisions; vì vậy Stage 1 chưa hoàn thành
+- **Next action:** Chốt Stage 2 experiment contract: train-only TF-IDF fit, fixed clean splits, One-vs-Rest targets theo ordered labels, validation macro-F1 để chọn config và test chỉ chạy sau khi config đóng băng
+- **Evidence required to complete current package:** Baseline chạy end-to-end, lưu validation/test predictions cùng metrics có thể truy về dataset fingerprint, config và ordered label names
+- **Current evidence gap:** Chưa có TF-IDF baseline implementation, predictions hoặc metrics
 - **Blockers:** None
-- **Last updated:** 2026-08-02
+- **Last updated:** 2026-08-04
 
 ### Stage progress
 
 - [x] Stage 0 — Environment and repository setup
-- [ ] Stage 1 — Data contract and analysis
+- [x] Stage 1 — Data contract and analysis
 - [ ] Stage 2 — TF-IDF + Logistic Regression baseline
 - [ ] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
 - [ ] Stage 4 — BiLSTM + Attention and Transformer Encoder
