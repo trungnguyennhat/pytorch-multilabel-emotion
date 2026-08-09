@@ -20,21 +20,21 @@ GoEmotions contract và data analysis
 <!-- CURRENT_STATUS_START -->
 
 - **Project state:** In progress
-- **Current stage:** Stage 2 — TF-IDF + Logistic Regression baseline
-- **Completed with current evidence:** Stage 0 environment smoke check đã pass. Stage 1 có audit contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385; `notebooks/goemotions_analysis.ipynb` đã tạo các kết quả về label imbalance, cardinality, text length, train–validation prevalence và label co-occurrence. Người học xác nhận phạm vi analysis hiện tại là đủ để kết thúc Stage 1.
-- **Current work package:** Thiết kế và triển khai TF-IDF + One-vs-Rest Logistic Regression làm classical baseline không can thiệp imbalance
+- **Current stage:** Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
+- **Completed with current evidence:** Stage 0 environment smoke check đã pass. Stage 1 có audit contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385; `notebooks/goemotions_analysis.ipynb` đã tạo các kết quả về label imbalance, cardinality, text length, train–validation prevalence và label co-occurrence. Stage 2 baseline đã chạy và lưu `outputs/tfidf_logreg/run.json` cùng `predictions.npz`: unigram được chọn bằng validation macro-F1 0.2376; clean test macro-F1 0.2315, micro-F1 0.4171. Artifact prediction đã được kiểm tra: 28 labels, validation `(5383, 28)`, test `(5385, 28)` và giá trị dự đoán nhị phân.
+- **Current work package:** Thiết kế Stage 3: shared PyTorch data/training pipeline và Mean Pooling MLP, giữ nguyên clean splits, ordered label mapping và Stage 2 classical baseline làm mốc so sánh
 - **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Chốt Stage 2 experiment contract: train-only TF-IDF fit, fixed clean splits, One-vs-Rest targets theo ordered labels, validation macro-F1 để chọn config và test chỉ chạy sau khi config đóng băng
-- **Evidence required to complete current package:** Baseline chạy end-to-end, lưu validation/test predictions cùng metrics có thể truy về dataset fingerprint, config và ordered label names
-- **Current evidence gap:** Chưa có TF-IDF baseline implementation, predictions hoặc metrics
+- **Next action:** Chốt thiết kế Stage 3 trước khi implementation: tokenization/vocabulary/padding contract, tensor shapes, `BCEWithLogitsLoss`, validation-only model selection và checkpoint evidence
+- **Evidence required to complete current package:** Chưa xác định — sẽ được chốt trong thiết kế Stage 3
+- **Current evidence gap:** Chưa có thiết kế hay implementation Stage 3. Lượt chạy lại Stage 2 trong phiên này bị giới hạn 60 giây khi loader đọc cache Hugging Face; status Stage 2 dựa trên artifact đã tạo và đã kiểm tra.
 - **Blockers:** None
-- **Last updated:** 2026-08-04
+- **Last updated:** 2026-08-09
 
 ### Stage progress
 
 - [x] Stage 0 — Environment and repository setup
 - [x] Stage 1 — Data contract and analysis
-- [ ] Stage 2 — TF-IDF + Logistic Regression baseline
+- [x] Stage 2 — TF-IDF + Logistic Regression baseline
 - [ ] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
 - [ ] Stage 4 — BiLSTM + Attention and Transformer Encoder
 - [ ] Stage 5 — Imbalance and threshold experiments

@@ -1,0 +1,50 @@
+TF-IDF + One-vs-Rest Logistic Regression Results
+
+Ví dụ với label joy:
+TP: model dự đoán joy, thực tế cũng có joy.
+FP: model dự đoán joy, nhưng thực tế không có.
+FN: thực tế có joy, nhưng model bỏ sót.
+
+Precision = TP / (TP + FP)
+Trong các lần model nói có label đó, bao nhiêu lần đúng.
+
+Recall = TP / (TP + FN)
+Trong các mẫu thực sự có label đó, model tìm được bao nhiêu.
+
+F1 là cân bằng giữa precision và recall. F1 chỉ cao khi cả hai cùng tốt.
+
+Macro: tính metric riêng cho từng label, rồi lấy trung bình đều. -> các label ít phổ biến cũng có ảnh hưởng đến kết quả
+
+Micro: gộp toàn bộ TP, FP, FN của mọi label trước, rồi tính metric một lần. -> label phổ biến như neutral sẽ ảnh hưởng mạnh hơn
+
+Train and validation results by candidate
+-----------------------------------------
+Candidate: unigram
+  N-gram range: (1, 1)
+  Minimum document frequency: 2
+  Vocabulary size: 13077
+  Train
+    Macro — precision: 0.7147, recall: 0.1877, F1: 0.2592
+    Micro — precision: 0.8087, recall: 0.3351, F1: 0.4738
+  Validation
+    Macro — precision: 0.5923, recall: 0.1718, F1: 0.2376
+    Micro — precision: 0.7094, recall: 0.2918, F1: 0.4135
+
+Candidate: unigram_bigram
+  N-gram range: (1, 2)
+  Minimum document frequency: 2
+  Vocabulary size: 58338
+  Train
+    Macro — precision: 0.7191, recall: 0.1582, F1: 0.2235
+    Micro — precision: 0.8915, recall: 0.3241, F1: 0.4753
+  Validation
+    Macro — precision: 0.5570, recall: 0.1418, F1: 0.2000
+    Micro — precision: 0.7251, recall: 0.2515, F1: 0.3735
+
+Final test results
+------------------
+Candidate selected by validation: unigram
+Test
+  Macro — precision: 0.6293, recall: 0.1688, F1: 0.2315
+  Micro — precision: 0.7134, recall: 0.2947, F1: 0.4171
+

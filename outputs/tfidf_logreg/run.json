@@ -84,10 +84,10 @@
           ]
         },
         "runtime_seconds": {
-          "vectorization": 0.37083110000094166,
-          "classifier_fit": 2.626104099996155,
-          "validation_prediction": 0.015240099994116463,
-          "total": 3.027525199999218
+          "vectorization": 0.3997472999999445,
+          "classifier_fit": 2.5506093999993027,
+          "validation_prediction": 0.014931900001101894,
+          "total": 3.1360316000009334
         },
         "validation_metrics": {
           "macro": {
@@ -99,6 +99,18 @@
             "precision": 0.709404990403071,
             "recall": 0.2918048318332544,
             "f1": 0.4135153278138286
+          }
+        },
+        "train_metrics": {
+          "macro": {
+            "precision": 0.7147157590565453,
+            "recall": 0.18773136862269602,
+            "f1": 0.25918888882934926
+          },
+          "micro": {
+            "precision": 0.8087276848965713,
+            "recall": 0.33508795961098176,
+            "f1": 0.4738436847129792
           }
         }
       },
@@ -131,10 +143,10 @@
           ]
         },
         "runtime_seconds": {
-          "vectorization": 0.7804522000005818,
-          "classifier_fit": 3.1640408000021125,
-          "validation_prediction": 0.009185900002194103,
-          "total": 3.969078800000716
+          "vectorization": 0.9618081000007805,
+          "classifier_fit": 3.3924779999997554,
+          "validation_prediction": 0.015934099999867612,
+          "total": 4.545170100000178
         },
         "validation_metrics": {
           "macro": {
@@ -146,6 +158,18 @@
             "precision": 0.7250796540737369,
             "recall": 0.25153955471340594,
             "f1": 0.3735052754982415
+          }
+        },
+        "train_metrics": {
+          "macro": {
+            "precision": 0.7191379129745442,
+            "recall": 0.1582493238787006,
+            "f1": 0.2235090072267669
+          },
+          "micro": {
+            "precision": 0.8914787102330839,
+            "recall": 0.32407099387511495,
+            "f1": 0.4753444316877153
           }
         }
       }
@@ -663,8 +687,8 @@
     }
   },
   "runtime_seconds": {
-    "test_evaluation": 0.06708440000511473,
-    "full_package": 13.711066699994262
+    "test_evaluation": 0.06439960000170686,
+    "full_package": 13.974790899999789
   },
   "artifacts": {
     "predictions": "outputs/tfidf_logreg/predictions.npz"

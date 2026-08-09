@@ -22,6 +22,7 @@ CONTRACT_PATH = (
 )
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "tfidf_logreg"
 RUN_PATH = OUTPUT_DIR / "run.json"
+RESULTS_PATH = OUTPUT_DIR / "results.txt"
 PREDICTIONS_PATH = OUTPUT_DIR / "predictions.npz"
 
 SPLIT_NAMES = ("train", "validation", "test")
@@ -293,6 +294,15 @@ def fit_candidate(
     fit_start = perf_counter()
     classifier.fit(X_train, y_train)
     fit_seconds = perf_counter() - fit_start
+
+    train_probabilities = classifier.predict_proba(X_train)
+    train_predictions = (train_probabilities >= THRESHOLD).astype(np.int8)
+
+    train_metrics = calculate_metrics(
+        y_true=y_train,
+        y_pred=train_predictions,
+        label_names=label_names,
+    )
     
     prediction_start = perf_counter()
     
@@ -352,6 +362,10 @@ def fit_candidate(
             "macro": validation_metrics["macro"],
             "micro": validation_metrics["micro"],
         },
+        "train_metrics": {
+            "macro": train_metrics["macro"],
+            "micro": train_metrics["micro"],
+        },
     }
 
     print(
@@ -377,35 +391,33 @@ def fit_candidate(
         "summary": summary,
     }
     
-def evaluate_test(
-    selected_candidate,
-    test_texts,
-    y_test,
+def evaluate_model(
+    candidate,
+    texts,
+    targets,
     label_names,
 ):
-    test_start = perf_counter()
+    evaluation_start = perf_counter()
 
-    # vectorizer luu config, vocab, IDF
-    X_test = selected_candidate["vectorizer"].transform(test_texts)
+    X = candidate["vectorizer"].transform(texts)
 
-    # classifier luu trong so da hoc cho các classifier
-    test_probabilities = selected_candidate["classifier"].predict_proba(X_test)
+    probabilities = candidate["classifier"].predict_proba(X)
 
-    test_predictions = (test_probabilities >= THRESHOLD).astype(np.int8)
+    predictions = (probabilities >= THRESHOLD).astype(np.int8)
     
-    test_metrics = calculate_metrics(
-        y_true=y_test,
-        y_pred=test_predictions,
+    metrics = calculate_metrics(
+        y_true=targets,
+        y_pred=predictions,
         label_names=label_names,
     )
 
     return {
-        "probabilities": test_probabilities,
-        "predictions": test_predictions,
-        "metrics": test_metrics,
-        "matrix_shape": list(X_test.shape),
+        "probabilities": probabilities,
+        "predictions": predictions,
+        "metrics": metrics,
+        "matrix_shape": list(X.shape),
         "runtime_seconds": float(
-            perf_counter() - test_start
+            perf_counter() - evaluation_start
         ),
     }
 
@@ -541,6 +553,85 @@ def write_outputs(
         ),
         encoding="utf-8",
     )
+    result_lines = [
+        "TF-IDF + One-vs-Rest Logistic Regression Results",
+        "",
+        "Train and validation results by candidate",
+        "-----------------------------------------",
+    ]
+
+    for candidate_summary in candidate_summaries:
+        candidate_config = candidate_summary["config"]
+        train_metrics = candidate_summary["train_metrics"]
+        candidate_metrics = candidate_summary["validation_metrics"]
+
+        result_lines.extend(
+            [
+                f"Candidate: {candidate_config['name']}",
+                f"  N-gram range: {tuple(candidate_config['ngram_range'])}",
+                f"  Minimum document frequency: {candidate_config['min_df']}",
+                f"  Vocabulary size: {candidate_summary['vocabulary_size']}",
+                "  Train",
+                (
+                    "    Macro — "
+                    f"precision: {train_metrics['macro']['precision']:.4f}, "
+                    f"recall: {train_metrics['macro']['recall']:.4f}, "
+                    f"F1: {train_metrics['macro']['f1']:.4f}"
+                ),
+                (
+                    "    Micro — "
+                    f"precision: {train_metrics['micro']['precision']:.4f}, "
+                    f"recall: {train_metrics['micro']['recall']:.4f}, "
+                    f"F1: {train_metrics['micro']['f1']:.4f}"
+                ),
+                "  Validation",
+                (
+                    "    Macro — "
+                    f"precision: {candidate_metrics['macro']['precision']:.4f}, "
+                    f"recall: {candidate_metrics['macro']['recall']:.4f}, "
+                    f"F1: {candidate_metrics['macro']['f1']:.4f}"
+                ),
+                (
+                    "    Micro — "
+                    f"precision: {candidate_metrics['micro']['precision']:.4f}, "
+                    f"recall: {candidate_metrics['micro']['recall']:.4f}, "
+                    f"F1: {candidate_metrics['micro']['f1']:.4f}"
+                ),
+                "",
+            ]
+        )
+
+    selected_config = selected_candidate["summary"]["config"]
+    test_metrics = test_result["metrics"]
+
+    result_lines.extend(
+        [
+            "Final test results",
+            "------------------",
+            (
+                "Candidate selected by validation: "
+                f"{selected_config['name']}"
+            ),
+            "Test",
+            (
+                "  Macro — "
+                f"precision: {test_metrics['macro']['precision']:.4f}, "
+                f"recall: {test_metrics['macro']['recall']:.4f}, "
+                f"F1: {test_metrics['macro']['f1']:.4f}"
+            ),
+            (
+                "  Micro — "
+                f"precision: {test_metrics['micro']['precision']:.4f}, "
+                f"recall: {test_metrics['micro']['recall']:.4f}, "
+                f"F1: {test_metrics['micro']['f1']:.4f}"
+            ),
+        ]
+    )
+
+    RESULTS_PATH.write_text(
+        "\n".join(result_lines) + "\n",
+        encoding="utf-8",
+    )
     
 def main():
     package_start = perf_counter()
@@ -602,12 +693,12 @@ def main():
         f"(validation macro-F1="
         f"{selected_macro_f1:.4f})"
     )
-    print("Evaluating clean test once")
+    print("Evaluating validation-selected candidate on clean test")
 
-    test_result = evaluate_test(
-        selected_candidate=selected_candidate,
-        test_texts=test_texts,
-        y_test=targets["test"],
+    test_result = evaluate_model(
+        candidate=selected_candidate,
+        texts=test_texts,
+        targets=targets["test"],
         label_names=label_names,
     )
 
