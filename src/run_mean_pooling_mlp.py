@@ -329,13 +329,276 @@ def build_dataloaders(
     }
     return torch_datasets, dataloaders
         
-def inspect_batch(
-    train_dataset,
-    clean_train_split,
-    vocabulary,
-    num_labels,
+class MeanPoolingMLP(nn.Module):
+    """
+    input_ids:      [batch_size, sequence_length]
+    attention_mask: [batch_size, sequence_length]
+
+    Output:
+        logits: [batch_size, num_labels]
+    """
+    
+    def __init__(
+        self, 
+        vocabulary_size,
+        num_labels,
+        embedding_dim,
+        hidden_dim,
+        dropout,
+    ):
+        # goi constructor cua class cha, khac voi java la tu dong goi
+        super().__init__()
+        
+        # tao 1 object thuoc class nn.Embedding
+        self.embedding = nn.Embedding(
+            # moi token trong vocab deu can 1 vector embedding 
+            num_embeddings=vocabulary_size,
+            # so chieu cua vecto embedding
+            embedding_dim=embedding_dim,
+            padding_idx=PAD_ID
+        )
+        # sau khi embedding cho tung token o tren, se lay mean pooling cac token de tao ra 1 vecto dai dien cho ca cau [embedding_dim]
+        # gia su: "a" -> [128], "b" -> [128],...-> mean pooling -> [128] cho 1 cau
+        
+        # sau do moi tao classifier de du lieu chay lan luot qua cac layer theo dung thu tu
+        self.classifier = nn.Sequential(
+            # sau khi da co vecto cua cau ta cho qua tang linear de bieu dien thanh hidden_dim
+            nn.Linear(embedding_dim, hidden_dim),
+            # ReLU de them non linear
+            nn.ReLU(),
+            # khi train se ngau nhien dropout de giam overfit
+            nn.Dropout(dropout),
+            # bien hidden vector thanh vecto 28 chieu = so emotion
+            nn.Linear(hidden_dim, num_labels),
+        )
+        
+    def forward(self, input_ids, attention_mask):
+        embeddings = self.embedding(input_ids)
+        # doi dang attention tu true/false thanh float 1.0/0.0
+        float_mask = attention_mask.unsqueeze(-1).to(dtype=embeddings.dtype)
+        
+        # -> embedding cua token * 1, embedding cua pad * 0
+        masked_embeddings = embeddings * float_mask
+        
+        # cong embedding cua tat ca token trong moi cau 
+        summed_embeddings = masked_embeddings.sum(dim=1)
+        
+        # chia cho min = 1, tranh de 0
+        real_token_counts = float_mask.sum(dim=1).clamp(min=1.0)
+        
+        # day chinh la mean pooling, ket qua cua toan bo embedding trong cau chia cho so token
+        pooled_features = summed_embeddings / real_token_counts 
+        
+        # sau khi co embedding cua ca cau ta cho qua classifier, thu dc logits 
+        logits = self.classifier(pooled_features)
+        
+        return logits
+    
+def calculate_metrics(
+    y_true,
+    y_pred,
+    label_names,
 ):
-    ""
+    metrics = {}
+    
+    for average in ("macro", "micro"):
+        precision, recall, f1, _ = (
+            precision_recall_fscore_support(
+                y_true, 
+                y_pred, 
+                average=average,
+                zero_division=0,
+            )
+        )
+        
+        metrics[average] = {
+            "precision": float(precision),
+            "recall": float(recall),
+            "f1": float(f1),
+        }
+    (
+        per_label_precision,
+        per_label_recall,
+        per_label_f1,
+        per_label_support,
+    ) = precision_recall_fscore_support(
+        y_true,
+        y_pred,
+        average=None,
+        zero_division=0,
+    )
+    
+    metrics["per_label"] = [
+        {
+            "label_id": label_id,
+            "label": label_name,
+            "support": int(per_label_support[label_id]),
+            "precision": float(
+                per_label_precision[label_id]
+            ),
+            "recall": float(
+                per_label_recall[label_id]
+            ),
+            "f1": float(per_label_f1[label_id]),
+        }
+        for label_id, label_name in enumerate(label_names)
+    ]
+
+    return metrics
+
+def train_one_epoch(
+    model, 
+    dataloader, 
+    criterion,
+    optimizer,
+    device,
+):
+    # chuyen model sang training mode, de su dung dropout
+    model.train()
+    
+    # cong don loss va tinh so sample da xu ly
+    total_loss = 0.0
+    total_samples = 0
+    
+    # wrapper hien progress bar
+    progress = tqdm(
+        dataloader, 
+        desc="Train",
+        leave=False,
+    )
+    
+    # khi for batch, dataloader se chon cac index, chon dataset[index], lay cac truong cua tung sample, gom cac sample thanh tung batch va tra ve batch
+    for batch in progress:
+        # batch["input_ids"] la tensor dang o cpu, to device se chuyen sang cuda
+        input_ids = batch["input_ids"].to(
+            device,
+            non_blocking=True,
+        )
+        
+        attention_mask = batch["attention_mask"].to(
+            device, 
+            non_blocking=True,
+        )
+        
+        labels = batch["labels"].to(
+            device,
+            non_blocking=True,
+        )
+        
+        optimizer.zero_grad(set_to_none=True)
+        
+        # model la nn.Module, se goi nn.Module.__call__(), khi do se goi forward() = model(...)
+        logits = model(input_ids, attention_mask)
+        
+        if logits.shape != labels.shape:
+            raise ValueError(
+                f"logits shape {tuple(logits.shape)} "
+                f"does not match labels shape "
+                f"{tuple(labels.shape)}"
+            )
+        
+        # tinh loss, criterion la ham loss (BCE)
+        # criterion la 1 object loss func, cung la 1 nn.Module
+        # bien logit thanh prob bang sigmoid roi so voi label bang BCE
+        # sau khi tinh loss thi pytorch se lay mean cuoi cung -> scalar tensor
+        loss = criterion(logits, labels)
+        
+        # tinh gradient cho tung parameter, chua cap nhat weight
+        # pytorch o day se xay 1 computation graph, moi parameter se duoc cap nhat dua tren chain rule
+        # tat ca cac parameter co requires_grad=True thi se duoc cap nhat gradient - chi update weight, chi tinh grad
+        loss.backward()
+        
+        # gioi han do lon cua gradient
+        clip_grad_norm_(
+            # lay tat ca parameter trainable cua model, moi parameter co gradient rieng
+            model.parameters(),
+            
+            # pytorch coi tat ca gradient nhu 1 vecto roi tinh L2, neu qua lon so voi max norm se scale xuong 1 ti le de gradnorm/maxnorm
+            max_norm=GRADIENT_CLIP_NORM,
+        )
+        
+        # cap nhat cac weight cua tung parameter
+        optimizer.step()
+        
+        batch_size = labels.shape[0]
+        # loss item chuyen tensor scalar thanh python float, tinh tong so loss cua cac sample, loss.item o day la trung binh cua 1 batch
+        total_loss += loss.item() * batch_size 
+        total_samples += batch_size
+        
+        progress.set_postfix(
+            loss=f"{loss.item():.4f}"
+        )
+
+    return total_loss / total_samples
+
+def evaluate(
+    model,
+    dataloader,
+    criterion,
+    device, 
+    label_names,
+):
+    # thay đổi mode của model
+    model.eval()
+    
+    total_loss = 0.0
+    total_samples = 0
+    probability_batches = []
+    target_batches = []
+    
+    # pytorch không xây computation graph để tính gradient
+    # khi train thì sẽ cần graph trên để lưu thông tin các layer nhưng với evaluate thì sẽ không cần
+    with torch.inference_mode():
+        for batch in tqdm(
+            dataloader, 
+            desc="Evaluate",
+            leave=False,
+        ):
+            input_ids = batch["input_ids"].to(
+                device,
+                non_blocking=True,
+            )
+            attention_mask = batch["attention_mask"].to(
+                device,
+                non_blocking=True,
+            )
+            labels = batch["labels"].to(
+                device,
+                non_blocking=True,
+            )
+            
+            # input_ids -> embedding -> mean pooling -> classifier -> logits
+            logits = model(input_ids, attention_mask)
+            if logits.shape != labels.shape:
+                raise ValueError(
+                    f"logits shape {tuple(logits.shape)} "
+                    f"does not match labels shape "
+                    f"{tuple(labels.shape)}"
+                )
+            
+            # ở đây logits sẽ không bị thay đổi mặc dù trong criterion sẽ phải tính sigmoid từ logits để ra loss
+            loss = criterion(logits, labels)
+            probabilities = torch.sigmoid(logits)
+            batch_size = labels.shape[0]
+            total_loss += loss.item() * batch_size
+            total_samples += batch_size
+            
+            # lưu probability: tách khỏi computation graph, chuyển sang cpu để làm việc với numpy, thêm prediction của batch hiện tại vào list
+            probability_batches.append(
+                probabilities.detach().cpu().numpy()
+            )
+            # lưu label thật vào list
+            target_batches.append(
+                labels.detach().cpu().numpy()
+            )
+
+    y_probability = np.concatenate(
+        probability_batches,
+        axis=0,
+    ).astype(np.float32)
+    
+    
+    
         
     
     
