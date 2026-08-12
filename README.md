@@ -20,22 +20,22 @@ GoEmotions contract và data analysis
 <!-- CURRENT_STATUS_START -->
 
 - **Project state:** In progress
-- **Current stage:** Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
-- **Completed with current evidence:** Stage 0 environment smoke check đã pass. Stage 1 có audit contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385; `notebooks/goemotions_analysis.ipynb` đã tạo các kết quả về label imbalance, cardinality, text length, train–validation prevalence và label co-occurrence. Stage 2 baseline đã chạy và lưu `outputs/tfidf_logreg/run.json` cùng `predictions.npz`: unigram được chọn bằng validation macro-F1 0.2376; clean test macro-F1 0.2315, micro-F1 0.4171. Artifact prediction đã được kiểm tra: 28 labels, validation `(5383, 28)`, test `(5385, 28)` và giá trị dự đoán nhị phân.
-- **Current work package:** Thiết kế Stage 3: shared PyTorch data/training pipeline và Mean Pooling MLP, giữ nguyên clean splits, ordered label mapping và Stage 2 classical baseline làm mốc so sánh
+- **Current stage:** Stage 4 — BiLSTM + Attention and Transformer Encoder
+- **Completed with current evidence:** Stage 0 environment smoke check đã pass. Stage 1 có audit contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385; EDA đã tạo các kết quả về label imbalance, cardinality, text length, train–validation prevalence và label co-occurrence. Stage 2 TF-IDF unigram baseline đạt validation macro-F1 0.2376; clean test macro-F1 0.2315, micro-F1 0.4171. Stage 3 shared PyTorch pipeline và Mean Pooling MLP đã chạy lại với tokenizer đúng contract: best epoch 37, validation macro/micro-F1 0.3638/0.4789 và clean test macro/micro-F1 0.3541/0.4788; checkpoint chứa 28 ordered labels và vocabulary 13,642, còn validation/test targets, probabilities và predictions có đúng shape `(5383, 28)` / `(5385, 28)` và range hợp lệ.
+- **Current work package:** Thiết kế Stage 4 dùng lại đúng clean splits, tokenizer/vocabulary/max length, training/evaluation loop và checkpoint contract của Stage 3 cho BiLSTM + Attention và Transformer Encoder
 - **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Chốt thiết kế Stage 3 trước khi implementation: tokenization/vocabulary/padding contract, tensor shapes, `BCEWithLogitsLoss`, validation-only model selection và checkpoint evidence
-- **Evidence required to complete current package:** Chưa xác định — sẽ được chốt trong thiết kế Stage 3
-- **Current evidence gap:** Chưa có thiết kế hay implementation Stage 3. Lượt chạy lại Stage 2 trong phiên này bị giới hạn 60 giây khi loader đọc cache Hugging Face; status Stage 2 dựa trên artifact đã tạo và đã kiểm tra.
+- **Next action:** Chốt thiết kế Stage 4 trước implementation: tensor flow và mask của BiLSTM attention, positional encoding và padding mask của Transformer, controlled-comparison config, validation-only selection và evidence cho mỗi model
+- **Evidence required to complete current package:** Chưa đóng băng — sẽ được xác định trong thiết kế Stage 4 cho hai architecture
+- **Current evidence gap:** Chưa có thiết kế, implementation, checkpoint hoặc predictions Stage 4; chưa xác nhận cách tái sử dụng shared pipeline hiện đang nằm trong script MLP mà không nhân bản preprocessing/training/evaluation logic
 - **Blockers:** None
-- **Last updated:** 2026-08-09
+- **Last updated:** 2026-08-12
 
 ### Stage progress
 
 - [x] Stage 0 — Environment and repository setup
 - [x] Stage 1 — Data contract and analysis
 - [x] Stage 2 — TF-IDF + Logistic Regression baseline
-- [ ] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
+- [x] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
 - [ ] Stage 4 — BiLSTM + Attention and Transformer Encoder
 - [ ] Stage 5 — Imbalance and threshold experiments
 - [ ] Stage 6 — Final controlled comparison, error analysis and report

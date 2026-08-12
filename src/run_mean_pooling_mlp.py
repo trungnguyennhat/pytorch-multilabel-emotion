@@ -29,6 +29,7 @@ OUTPUT_DIR = PROJECT_ROOT / "outputs" / "mean_pooling_mlp"
 CHECKPOINT_PATH = OUTPUT_DIR / "checkpoint.pt"
 PREDICTIONS_PATH = OUTPUT_DIR / "predictions.npz"
 RUN_PATH = OUTPUT_DIR / "run.json"
+RESULTS_PATH = OUTPUT_DIR / "results.txt"
 
 SPLIT_NAMES = ("train", "validation", "test")
 
@@ -46,8 +47,9 @@ DROPOUT = 0.2
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-3
 WEIGHT_DECAY = 1e-4
-MAX_EPOCHS = 15
-EARLY_STOPPING_PATIENCE = 3
+MAX_EPOCHS = 50
+EARLY_STOPPING_PATIENCE = 10
+LOG_EVERY_EPOCHS = 10
 GRADIENT_CLIP_NORM = 1.0
 THRESHOLD = 0.5
 
@@ -129,7 +131,7 @@ def load_clean_dataset():
 
 # phần 1: cho phép các ký tự, chữ số, _ và cả dấu ' (ví dụ don't)
 # phần 2: cho phép lấy cả các ký hiệu, dấu câu, dấu ngoặc
-TOKEN_PATTERN = re.compile(r"\w+(?:'\w+)? | [^\w\s]", re.UNICODE)
+TOKEN_PATTERN = re.compile(r"\w+(?:'\w+)?|[^\w\s]", re.UNICODE)
 
 def tokenize(text):
     """
@@ -446,6 +448,57 @@ def calculate_metrics(
 
     return metrics
 
+
+def format_results(
+    best_epoch,
+    validation_output,
+    test_output,
+):
+    validation_macro = validation_output["metrics"]["macro"]
+    validation_micro = validation_output["metrics"]["micro"]
+    test_macro = test_output["metrics"]["macro"]
+    test_micro = test_output["metrics"]["micro"]
+
+    return "\n".join(
+        [
+            "Mean Pooling MLP Results",
+            "",
+            f"Best epoch: {best_epoch}",
+            f"Threshold: {THRESHOLD}",
+            "",
+            "Validation",
+            f"  Loss: {validation_output['loss']:.4f}",
+            (
+                "  Macro - "
+                f"precision: {validation_macro['precision']:.4f}, "
+                f"recall: {validation_macro['recall']:.4f}, "
+                f"F1: {validation_macro['f1']:.4f}"
+            ),
+            (
+                "  Micro - "
+                f"precision: {validation_micro['precision']:.4f}, "
+                f"recall: {validation_micro['recall']:.4f}, "
+                f"F1: {validation_micro['f1']:.4f}"
+            ),
+            "",
+            "Test",
+            f"  Loss: {test_output['loss']:.4f}",
+            (
+                "  Macro - "
+                f"precision: {test_macro['precision']:.4f}, "
+                f"recall: {test_macro['recall']:.4f}, "
+                f"F1: {test_macro['f1']:.4f}"
+            ),
+            (
+                "  Micro - "
+                f"precision: {test_micro['precision']:.4f}, "
+                f"recall: {test_micro['recall']:.4f}, "
+                f"F1: {test_micro['f1']:.4f}"
+            ),
+            "",
+        ]
+    )
+
 def train_one_epoch(
     model, 
     dataloader, 
@@ -597,10 +650,495 @@ def evaluate(
         axis=0,
     ).astype(np.float32)
     
+    y_true = np.concatenate(
+        target_batches,
+        axis=0,
+    ).astype(np.float32)
     
+    y_pred = (y_probability >= THRESHOLD).astype(np.int8)
     
+    metrics = calculate_metrics(
+        y_true=y_true,
+        y_pred=y_pred,
+        label_names=label_names,
+    )
+    
+    return {
+        "loss": total_loss / total_samples,
+        "metrics": metrics,
+        "targets": y_true,
+        "probabilities": y_probability,
+        "predictions": y_pred,
+    }
+
+def save_checkpoint(
+    model,
+    vocabulary, 
+    label_names,
+    max_length,
+    best_epoch,
+    best_validation_macro_f1,
+):
+    checkpoint = {
+        "model_state_dict": model.state_dict(),
+        "model_config": {
+            "vocabulary_size": len(vocabulary),
+            "num_labels": len(label_names),
+            "embedding_dim": EMBEDDING_DIM,
+            "hidden_dim": HIDDEN_DIM,
+            "dropout": DROPOUT,
+        },
+        "vocabulary": vocabulary,
+        "tokenizer_config": {
+            "name": "lowercase_regex_words_and_punctuation",
+            "pattern": TOKEN_PATTERN.pattern,
+            "min_frequency": MIN_FREQUENCY,
+            "pad_token": PAD_TOKEN,
+            "pad_id": PAD_ID,
+            "unk_token": UNK_TOKEN,
+            "unk_id": UNK_ID,
+            "max_length": max_length,
+        },
+        "label_names": label_names,
+        "seed": SEED,
+        "best_epoch": best_epoch,
+        "best_validation_macro_f1": (
+            best_validation_macro_f1
+        ),
+        "threshold": THRESHOLD,
+    }
+    
+    torch.save(checkpoint, CHECKPOINT_PATH)
+    
+def train_and_select(
+    model,
+    dataloaders,
+    criterion,
+    optimizer,
+    device,
+    vocabulary,
+    label_names,
+    max_length,
+):
+    best_validation_macro_f1 = -1.0
+    best_epoch = 0
+    epochs_without_improvement = 0
+    history = []
+    
+    training_start = perf_counter()
+    
+    for epoch in range(1, MAX_EPOCHS + 1):
+        epoch_start = perf_counter()
         
+        train_loss = train_one_epoch(
+            model=model,
+            dataloader=dataloaders["train"],
+            criterion=criterion,
+            optimizer=optimizer,
+            device=device,
+        )
+        
+        validation_output = evaluate(
+            model=model,
+            dataloader=dataloaders["validation"],
+            criterion=criterion,
+            device=device,
+            label_names=label_names,
+        )
+        
+        validation_macro_f1 = validation_output["metrics"]["macro"]["f1"]
+        
+        epoch_seconds = perf_counter() - epoch_start
+        
+        epoch_record = {
+            "epoch": epoch,
+            "train_loss": float(train_loss),
+            "validation_loss": float(validation_output["loss"]),
+            "validation_macro_f1": float(validation_macro_f1),
+            "validation_micro_f1": float(validation_output["metrics"]["micro"]["f1"]),
+            "runtime_seconds": float(epoch_seconds),
+        }
+        history.append(epoch_record)
+        
+        should_log = (
+            epoch % LOG_EVERY_EPOCHS == 0
+            or epoch == MAX_EPOCHS
+        )
+        
+        if should_log: 
+            print(
+                f"Epoch {epoch:02d} | "
+                f"train loss {train_loss:.4f} | "
+                f"validation loss "
+                f"{validation_output['loss']:.4f} | "
+                f"macro-F1 {validation_macro_f1:.4f} | "
+                f"micro-F1 "
+                f"{validation_output['metrics']['micro']['f1']:.4f}"
+            )
+
+        if validation_macro_f1 > best_validation_macro_f1:
+            best_validation_macro_f1 = (
+                validation_macro_f1 
+            )
+            best_epoch = epoch 
+            epochs_without_improvement = 0
+            
+            save_checkpoint(
+                model=model,
+                vocabulary=vocabulary,
+                label_names=label_names,
+                max_length=max_length,
+                best_epoch=best_epoch,
+                best_validation_macro_f1=(
+                    best_validation_macro_f1
+                ),
+            )
+        else:
+            epochs_without_improvement += 1
+            
+            if (
+                epochs_without_improvement
+                >= EARLY_STOPPING_PATIENCE
+            ):
+                if not should_log:
+                    print(
+                        f"Epoch {epoch:02d} | "
+                        f"train loss {train_loss:.4f} | "
+                        f"validation loss "
+                        f"{validation_output['loss']:.4f} | "
+                        f"macro-F1 {validation_macro_f1:.4f} | "
+                        f"micro-F1 "
+                        f"{validation_output['metrics']['micro']['f1']:.4f}"
+                    )
+                
+                print(
+                    "Early stopping: validation macro-F1 "
+                    f"did not improve for "
+                    f"{EARLY_STOPPING_PATIENCE} epochs."
+                    f"Best epoch: {best_epoch}."
+                )
+                break
+
+    training_seconds = perf_counter() - training_start 
     
+    return {
+        "best_epoch": best_epoch,
+        "best_validation_macro_f1": float(
+            best_validation_macro_f1
+        ),
+        "history": history,
+        "training_seconds": float(training_seconds),
+    }
+
+def load_selected_checkpoint(model, device):
+    checkpoint = torch.load(
+        CHECKPOINT_PATH,
+        map_location=device,
+        weights_only=True,
+    )
+    model.load_state_dict(checkpoint["model_state_dict"])
+    return checkpoint
+
+def main():
+    OUTPUT_DIR.mkdir(parents=True, exist_ok = True)
+    set_seed(SEED)
     
+    device = torch.device(
+        "cuda" if torch.cuda.is_available() else "cpu"
+    )
+    
+    print(f"Device: {device}")
+    
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats(device)
+        torch.cuda.synchronize(device)
+        
+    package_start = perf_counter()
+    
+    contract, clean_dataset = load_clean_dataset()
+    label_names = contract["schema"]["label_names"]
+    num_labels = len(label_names)
+
+    if num_labels != contract["schema"]["num_labels"]:
+        raise ValueError(
+            "label_names length differs from num_labels"
+        )
+    train_texts = clean_dataset["train"]["text"]
+    
+    vocabulary = build_vocabulary(train_texts)
+    max_length, length_summary = choost_max_length(train_texts)
+    
+    print(f"Vocabulary size: {len(vocabulary):,}")
+    print(f"Train token lengths: {length_summary}")
+    
+    torch_datasets, dataloaders = build_dataloaders(
+        clean_dataset=clean_dataset,
+        vocabulary=vocabulary,
+        max_length=max_length,
+        num_labels=num_labels,
+        device=device,
+    )
+    
+    model = MeanPoolingMLP(
+        vocabulary_size=len(vocabulary),
+        num_labels=num_labels,
+        embedding_dim=EMBEDDING_DIM,
+        hidden_dim=HIDDEN_DIM,
+        dropout=DROPOUT,
+    ).to(device)
+    
+    parameter_count = sum(
+        parameter.numel()
+        for parameter in model.parameters()
+        if parameter.requires_grad
+    )
+    
+    print(f"Trainable parameters: {parameter_count:,}")
+
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=LEARNING_RATE,
+        weight_decay=WEIGHT_DECAY,
+    )
+    
+    training_summary = train_and_select(
+        model=model,
+        dataloaders=dataloaders,
+        criterion=criterion,
+        optimizer=optimizer,
+        device=device,
+        vocabulary=vocabulary,
+        label_names=label_names,
+        max_length=max_length,
+    )
+    
+    checkpoint = load_selected_checkpoint(
+        model=model,
+        device=device,
+    )
+    
+    if checkpoint["label_names"] != label_names:
+        raise ValueError(
+            "Checkpoint label order differs from data contract"
+        )
+
+    if checkpoint["vocabulary"] != vocabulary:
+        raise ValueError(
+            "Checkpoint vocabulary differs from current vocabulary"
+        )
+
+    print(
+        "\nLoaded selected checkpoint from epoch "
+        f"{checkpoint['best_epoch']}."
+    )
+    
+    # validation chay voi selected checkpoint
+    validation_output = evaluate(
+        model=model,
+        dataloader=dataloaders["validation"],
+        criterion=criterion,
+        device=device,
+        label_names=label_names,
+    )
+    
+    test_start = perf_counter()
+    
+    test_output = evaluate(
+        model=model,
+        dataloader=dataloaders["test"],
+        criterion=criterion,
+        device=device,
+        label_names=label_names,
+    )
+    
+    test_seconds = perf_counter() - test_start 
+    
+    if validation_output["predictions"].shape != (
+        len(clean_dataset["validation"]),
+        num_labels,
+    ):
+        raise ValueError(
+            "Unexpected validation prediction shape"
+        )
+    if test_output["predictions"].shape != (
+        len(clean_dataset["test"]),
+        num_labels,
+    ):
+        raise ValueError(
+            "Unexpected test prediction shape"
+        )
+    
+    np.savez_compressed(
+        PREDICTIONS_PATH,
+        validation_targets=validation_output["targets"],
+        validation_probabilities=(validation_output["probabilities"]),
+        validation_predictions=(validation_output["predictions"]),
+        test_targets=test_output["targets"],
+        test_probabilities=test_output["probabilities"],
+        test_predictions=test_output["predictions"],
+    )
+    
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+        peak_gpu_memory_mb = (
+            torch.cuda.max_memory_allocated(device) / (1024 ** 2)
+        )
+    else:
+        peak_gpu_memory_mb = 0.0
+    
+    full_package_seconds = perf_counter() - package_start
+    
+    run_record = {
+        "system": "mean_pooling_mlp",
+        "seed": SEED,
+        "software": {
+            "torch": torch.__version__,
+            "datasets": hf_datasets.__version__,
+            "scikit_learn": sklearn.__version__,
+            "numpy": np.__version__,
+        },
+        "device": {
+            "type": device.type,
+            "name": (
+                torch.cuda.get_device_name(device)
+                if device.type == "cuda"
+                else "CPU"
+            ),
+        },
+        "dataset": {
+            "source": contract["dataset"]["source"],
+            "config": contract["dataset"]["config"],
+            "evaluation_policy": (
+                contract["evaluation_policy"]["name"]
+            ),
+            "official_fingerprints": {
+                split_name: contract[
+                    "official_splits"
+                ][split_name]["fingerprint"]
+                for split_name in SPLIT_NAMES
+            },
+            "clean_split_sizes": {
+                split_name: len(clean_dataset[split_name])
+                for split_name in SPLIT_NAMES
+            },
+        },
+        "label_names": label_names,
+        "preprocessing": {
+            "tokenizer": (
+                "lowercase_regex_words_and_punctuation"
+            ),
+            "token_pattern": TOKEN_PATTERN.pattern,
+            "minimum_frequency": MIN_FREQUENCY,
+            "vocabulary_size": len(vocabulary),
+            "max_length": max_length,
+            "train_token_length_summary": length_summary,
+            "pad_id": PAD_ID,
+            "unk_id": UNK_ID,
+        },
+        "model_config": checkpoint["model_config"],
+        "training_config": {
+            "batch_size": BATCH_SIZE,
+            "optimizer": "AdamW",
+            "learning_rate": LEARNING_RATE,
+            "weight_decay": WEIGHT_DECAY,
+            "loss": "BCEWithLogitsLoss",
+            "max_epochs": MAX_EPOCHS,
+            "early_stopping_patience": (
+                EARLY_STOPPING_PATIENCE
+            ),
+            "gradient_clip_norm": GRADIENT_CLIP_NORM,
+            "selection_metric": "validation_macro_f1",
+            "threshold": THRESHOLD,
+        },
+        "selection": {
+            "best_epoch": training_summary["best_epoch"],
+            "best_validation_macro_f1": (
+                training_summary[
+                    "best_validation_macro_f1"
+                ]
+            ),
+            "history": training_summary["history"],
+        },
+        "results": {
+            "validation": {
+                "loss": float(validation_output["loss"]),
+                **validation_output["metrics"],
+            },
+            "test": {
+                "loss": float(test_output["loss"]),
+                **test_output["metrics"],
+            },
+        },
+        "efficiency": {
+            "trainable_parameter_count": parameter_count,
+            "training_seconds": training_summary[
+                "training_seconds"
+            ],
+            "test_evaluation_seconds": float(test_seconds),
+            "full_package_seconds": float(
+                full_package_seconds
+            ),
+            "peak_gpu_memory_mb": float(
+                peak_gpu_memory_mb
+            ),
+        },
+        "artifacts": {
+            "checkpoint": str(
+                CHECKPOINT_PATH.relative_to(PROJECT_ROOT)
+            ),
+            "predictions": str(
+                PREDICTIONS_PATH.relative_to(PROJECT_ROOT)
+            ),
+            "results": str(
+                RESULTS_PATH.relative_to(PROJECT_ROOT)
+            ),
+        },
+    }
+    
+    RUN_PATH.write_text(
+        json.dumps(
+            run_record,
+            indent=2,
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    RESULTS_PATH.write_text(
+        format_results(
+            best_epoch=training_summary["best_epoch"],
+            validation_output=validation_output,
+            test_output=test_output,
+        ),
+        encoding="utf-8",
+    )
+    
+    print("\nSELECTED RESULTS")
+    print(
+        "Validation macro-F1: "
+        f"{validation_output['metrics']['macro']['f1']:.4f}"
+    )
+    print(
+        "Validation micro-F1: "
+        f"{validation_output['metrics']['micro']['f1']:.4f}"
+    )
+    print(
+        "Test macro-F1: "
+        f"{test_output['metrics']['macro']['f1']:.4f}"
+    )
+    print(
+        "Test micro-F1: "
+        f"{test_output['metrics']['micro']['f1']:.4f}"
+    )
+    print(
+        f"Peak GPU memory: {peak_gpu_memory_mb:.1f} MB"
+    )
+    print(f"Saved checkpoint: {CHECKPOINT_PATH}")
+    print(f"Saved predictions: {PREDICTIONS_PATH}")
+    print(f"Saved run record: {RUN_PATH}")
+    print(f"Saved concise results: {RESULTS_PATH}")
 
 
+if __name__ == "__main__":
+    main()
