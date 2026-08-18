@@ -21,14 +21,14 @@ GoEmotions contract và data analysis
 
 - **Project state:** In progress
 - **Current stage:** Stage 4 — BiLSTM + Attention and Transformer Encoder
-- **Completed with current evidence:** Stage 0 environment smoke check đã pass. Stage 1 có audit contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385; EDA đã tạo các kết quả về label imbalance, cardinality, text length, train–validation prevalence và label co-occurrence. Stage 2 TF-IDF unigram baseline đạt validation macro-F1 0.2376; clean test macro-F1 0.2315, micro-F1 0.4171. Stage 3 shared PyTorch pipeline và Mean Pooling MLP đã chạy lại với tokenizer đúng contract: best epoch 37, validation macro/micro-F1 0.3638/0.4789 và clean test macro/micro-F1 0.3541/0.4788; checkpoint chứa 28 ordered labels và vocabulary 13,642, còn validation/test targets, probabilities và predictions có đúng shape `(5383, 28)` / `(5385, 28)` và range hợp lệ.
-- **Current work package:** Thiết kế Stage 4 dùng lại đúng clean splits, tokenizer/vocabulary/max length, training/evaluation loop và checkpoint contract của Stage 3 cho BiLSTM + Attention và Transformer Encoder
+- **Completed with current evidence:** Stage 0 environment smoke check đã pass. Stage 1 có audit contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385; EDA đã tạo các kết quả về label imbalance, cardinality, text length, train–validation prevalence và label co-occurrence. Stage 2 TF-IDF unigram baseline đạt validation macro-F1 0.2376; clean test macro-F1 0.2315, micro-F1 0.4171. Stage 3 Mean Pooling MLP đạt validation macro/micro-F1 0.3638/0.4789 và clean test 0.3541/0.4788. Stage 4 BiLSTM + Attention đã hoàn thành selected run ở best epoch 21: validation macro/micro-F1 0.4000/0.4952 và clean test 0.3880/0.4948; checkpoint/run contract nhất quán, vocabulary 13,642 và validation/test prediction arrays đúng shape/range.
+- **Current work package:** Implement và train Transformer Encoder bằng đúng shared preprocessing, training/evaluation policy và artifact contract đã dùng cho MLP/BiLSTM
 - **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Chốt thiết kế Stage 4 trước implementation: tensor flow và mask của BiLSTM attention, positional encoding và padding mask của Transformer, controlled-comparison config, validation-only selection và evidence cho mỗi model
-- **Evidence required to complete current package:** Chưa đóng băng — sẽ được xác định trong thiết kế Stage 4 cho hai architecture
-- **Current evidence gap:** Chưa có thiết kế, implementation, checkpoint hoặc predictions Stage 4; chưa xác nhận cách tái sử dụng shared pipeline hiện đang nằm trong script MLP mà không nhân bản preprocessing/training/evaluation logic
+- **Next action:** Viết `src/run_transformer_encoder.py`, train exploratory seed 42, chọn checkpoint bằng validation macro-F1 và chỉ evaluate clean test sau khi checkpoint đã đóng băng
+- **Evidence required to complete current package:** Transformer checkpoint load lại được; validation/test targets, probabilities và predictions đúng shape `(5383, 28)` / `(5385, 28)`; `run.json` và `results.txt` khớp selected checkpoint; có macro/micro metrics, parameter count, runtime và peak GPU memory
+- **Current evidence gap:** Chưa có implementation hoặc artifact Transformer Encoder; Stage 4 chỉ hoàn thành phần BiLSTM + Attention
 - **Blockers:** None
-- **Last updated:** 2026-08-12
+- **Last updated:** 2026-08-15
 
 ### Stage progress
 
