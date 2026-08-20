@@ -1,0 +1,14 @@
+Transformer Encoder Results
+
+Best epoch: 27
+Threshold: 0.5
+
+Validation
+  Loss: 0.1095
+  Macro - precision: 0.5634, recall: 0.4024, F1: 0.4508
+  Micro - precision: 0.6063, recall: 0.4786, F1: 0.5349
+
+Test
+  Loss: 0.1092
+  Macro - precision: 0.5301, recall: 0.3933, F1: 0.4366
+  Micro - precision: 0.6031, recall: 0.4785, F1: 0.5336
