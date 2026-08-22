@@ -20,15 +20,15 @@ GoEmotions contract và data analysis
 <!-- CURRENT_STATUS_START -->
 
 - **Project state:** In progress
-- **Current stage:** Stage 4 — BiLSTM + Attention and Transformer Encoder
-- **Completed with current evidence:** Stage 0 environment smoke check đã pass. Stage 1 có audit contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385; EDA đã tạo các kết quả về label imbalance, cardinality, text length, train–validation prevalence và label co-occurrence. Stage 2 TF-IDF unigram baseline đạt validation macro-F1 0.2376; clean test macro-F1 0.2315, micro-F1 0.4171. Stage 3 Mean Pooling MLP đạt validation macro/micro-F1 0.3638/0.4789 và clean test 0.3541/0.4788. Stage 4 BiLSTM + Attention đã hoàn thành selected run ở best epoch 21: validation macro/micro-F1 0.4000/0.4952 và clean test 0.3880/0.4948; checkpoint/run contract nhất quán, vocabulary 13,642 và validation/test prediction arrays đúng shape/range.
-- **Current work package:** Implement và train Transformer Encoder bằng đúng shared preprocessing, training/evaluation policy và artifact contract đã dùng cho MLP/BiLSTM
+- **Current stage:** Stage 5 — Imbalance and threshold experiments
+- **Completed with current evidence:** Stage 0–1 environment/data contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385. Stage 2 TF-IDF đạt clean test macro/micro-F1 0.2315/0.4171. Stage 3 Mean Pooling MLP đạt 0.3541/0.4788. Stage 4 đã hoàn thành cả hai model: BiLSTM + Attention đạt 0.3880/0.4948; Transformer Encoder selected ở epoch 27 đạt validation macro/micro-F1 0.4508/0.5349 và clean test 0.4366/0.5336. Transformer checkpoint/run/vocabulary/28-label contract nhất quán; validation/test targets, probabilities và predictions đúng shape `(5383, 28)` / `(5385, 28)` và range hợp lệ.
+- **Current work package:** Thiết kế Stage 5 controlled experiments cho train-only `pos_weight` và fixed/global/per-label thresholds, dùng Transformer Encoder làm neural candidate mạnh nhất hiện tại
 - **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Viết `src/run_transformer_encoder.py`, train exploratory seed 42, chọn checkpoint bằng validation macro-F1 và chỉ evaluate clean test sau khi checkpoint đã đóng băng
-- **Evidence required to complete current package:** Transformer checkpoint load lại được; validation/test targets, probabilities và predictions đúng shape `(5383, 28)` / `(5385, 28)`; `run.json` và `results.txt` khớp selected checkpoint; có macro/micro metrics, parameter count, runtime và peak GPU memory
-- **Current evidence gap:** Chưa có implementation hoặc artifact Transformer Encoder; Stage 4 chỉ hoàn thành phần BiLSTM + Attention
+- **Next action:** Chốt thiết kế Stage 5 trước implementation: baseline không weight ở threshold 0.5, Transformer train lại với `pos_weight` chỉ tính từ train labels, và threshold global/per-label chỉ tune từ validation probabilities
+- **Evidence required to complete current package:** Bảng controlled experiments tách ảnh hưởng của loss weighting và threshold; mọi threshold được chọn bằng validation; test chỉ evaluate sau khi strategy đóng băng; probabilities được tái sử dụng thay vì forward lại cho từng threshold
+- **Current evidence gap:** Chưa xác định công thức/clipping policy cho `pos_weight`, search space và tie-breaker cho global/per-label threshold, hay model runs tối thiểu cần train lại
 - **Blockers:** None
-- **Last updated:** 2026-08-15
+- **Last updated:** 2026-08-21
 
 ### Stage progress
 
@@ -36,7 +36,7 @@ GoEmotions contract và data analysis
 - [x] Stage 1 — Data contract and analysis
 - [x] Stage 2 — TF-IDF + Logistic Regression baseline
 - [x] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
-- [ ] Stage 4 — BiLSTM + Attention and Transformer Encoder
+- [x] Stage 4 — BiLSTM + Attention and Transformer Encoder
 - [ ] Stage 5 — Imbalance and threshold experiments
 - [ ] Stage 6 — Final controlled comparison, error analysis and report
 

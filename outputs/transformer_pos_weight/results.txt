@@ -1,0 +1,14 @@
+Transformer + Pos Weight Results
+
+Best epoch: 50
+Threshold: 0.5
+
+Validation
+  Loss: 1.3549
+  Macro - precision: 0.2992, recall: 0.6467, F1: 0.3925
+  Micro - precision: 0.3129, recall: 0.6891, F1: 0.4303
+
+Test
+  Loss: 1.3936
+  Macro - precision: 0.2850, recall: 0.6287, F1: 0.3779
+  Micro - precision: 0.3098, recall: 0.6848, F1: 0.4266
