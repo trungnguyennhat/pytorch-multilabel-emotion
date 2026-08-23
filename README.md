@@ -20,15 +20,15 @@ GoEmotions contract và data analysis
 <!-- CURRENT_STATUS_START -->
 
 - **Project state:** In progress
-- **Current stage:** Stage 5 — Imbalance and threshold experiments
-- **Completed with current evidence:** Stage 0–1 environment/data contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385. Stage 2 TF-IDF đạt clean test macro/micro-F1 0.2315/0.4171. Stage 3 Mean Pooling MLP đạt 0.3541/0.4788. Stage 4 đã hoàn thành cả hai model: BiLSTM + Attention đạt 0.3880/0.4948; Transformer Encoder selected ở epoch 27 đạt validation macro/micro-F1 0.4508/0.5349 và clean test 0.4366/0.5336. Transformer checkpoint/run/vocabulary/28-label contract nhất quán; validation/test targets, probabilities và predictions đúng shape `(5383, 28)` / `(5385, 28)` và range hợp lệ.
-- **Current work package:** Thiết kế Stage 5 controlled experiments cho train-only `pos_weight` và fixed/global/per-label thresholds, dùng Transformer Encoder làm neural candidate mạnh nhất hiện tại
+- **Current stage:** Stage 6 — Final controlled comparison, error analysis and report
+- **Completed with current evidence:** Stage 0–1 environment/data contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385. Stage 2 TF-IDF đạt clean test macro/micro-F1 0.2315/0.4171. Stage 3 Mean Pooling MLP đạt 0.3541/0.4788. Stage 4 đã hoàn thành: BiLSTM + Attention đạt 0.3880/0.4948; Transformer Encoder đạt 0.4366/0.5336. Stage 5 đã so sánh đủ Standard BCE và capped train-only `pos_weight` với fixed/global/per-label thresholds. Standard BCE + per-label thresholds được chọn bằng validation macro-F1 0.4813 và đạt test macro/micro-F1 0.4679/0.5374; `pos_weight` làm recall tăng nhưng precision và F1 tổng thể giảm.
+- **Current work package:** Thiết kế Stage 6 cho final single-seed neural comparison, efficiency measurements, research-slice/error analysis và final report
 - **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Chốt thiết kế Stage 5 trước implementation: baseline không weight ở threshold 0.5, Transformer train lại với `pos_weight` chỉ tính từ train labels, và threshold global/per-label chỉ tune từ validation probabilities
-- **Evidence required to complete current package:** Bảng controlled experiments tách ảnh hưởng của loss weighting và threshold; mọi threshold được chọn bằng validation; test chỉ evaluate sau khi strategy đóng băng; probabilities được tái sử dụng thay vì forward lại cho từng threshold
-- **Current evidence gap:** Chưa xác định công thức/clipping policy cho `pos_weight`, search space và tie-breaker cho global/per-label threshold, hay model runs tối thiểu cần train lại
+- **Next action:** Chốt thiết kế Stage 6 trước implementation: dùng các final neural runs với seed `42`, tổng hợp quality và efficiency, rồi phân tích các research slices và failure modes từ outputs đã lưu
+- **Evidence required to complete current package:** Final single-seed neural comparison với macro/micro precision-recall-F1; parameter count, total training time và peak GPU memory trên cùng setup; error analysis theo text length, label cardinality, negation/ambiguity; final report trả lời các research questions và nêu rõ limitation do không đánh giá multi-seed stability
+- **Current evidence gap:** Chưa có bảng final comparison/efficiency thống nhất, slice/error analysis và final report được tạo trực tiếp từ run outputs
 - **Blockers:** None
-- **Last updated:** 2026-08-21
+- **Last updated:** 2026-08-23
 
 ### Stage progress
 
@@ -37,7 +37,7 @@ GoEmotions contract và data analysis
 - [x] Stage 2 — TF-IDF + Logistic Regression baseline
 - [x] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
 - [x] Stage 4 — BiLSTM + Attention and Transformer Encoder
-- [ ] Stage 5 — Imbalance and threshold experiments
+- [x] Stage 5 — Imbalance and threshold experiments
 - [ ] Stage 6 — Final controlled comparison, error analysis and report
 
 <!-- CURRENT_STATUS_END -->
@@ -103,7 +103,7 @@ Không tạo multi-hot example ở Stage 1. Shape, dtype và label mapping của
 - Hyperparameter, checkpoint và threshold chỉ được chọn bằng validation.
 - Test chỉ được dùng sau khi config và threshold đã đóng băng.
 - Primary selection metric là validation macro-F1; luôn báo cáo micro-F1 song song.
-- Không chọn seed tốt nhất làm kết quả chính.
+- Final neural comparison dùng seed cố định `42`; không chọn seed dựa trên test metrics.
 
 ### Controlled comparison
 
@@ -115,7 +115,7 @@ Giữ cố định giữa các neural architectures khi hợp lý:
 
 Kết quả là practical system comparison, không được diễn giải như causal architecture ablation nếu model capacity hoặc optimization khác nhau.
 
-Chỉ chạy các seed `13, 42, 2026` sau khi mỗi architecture đã có một config ổn định. Exploratory runs không cần chạy nhiều seed.
+Project dùng một seed cố định `42` cho các neural architectures. Không thực hiện multi-seed vì giới hạn thời gian/tài nguyên; final report phải ghi đây là limitation và không được kết luận về độ ổn định giữa các lần khởi tạo.
 
 ## 4. Minimum Evaluation
 
@@ -127,7 +127,7 @@ Chỉ tính các kết quả cần cho research questions:
 - **Threshold study:** so sánh fixed `0.5`, tuned global và tuned per-label thresholds; chỉ tune trên validation.
 - **Research slices:** text length, label cardinality và các nhóm negation/ambiguity có đủ evidence.
 - **Efficiency:** trainable parameter count, total training time và peak GPU memory trên cùng setup.
-- **Final stability:** mean và standard deviation qua ba seeds cho các neural architectures.
+- **Final comparison:** dùng các neural runs với seed cố định `42`; báo cáo trực tiếp metrics của từng model và nêu rõ chưa đo multi-seed stability.
 
 Không mặc định tính weighted-F1, samples-F1, Hamming loss, exact match, PR-AUC hoặc inference benchmark. Chỉ bổ sung khi final analysis cho thấy một metric đó cần để giải thích kết quả.
 
@@ -155,7 +155,7 @@ Với Stage 1, một script gồm các pha `load contract → audit rows/splits 
 ### Artifact policy
 
 - Lưu artifact cần để tái lập kết quả hoặc thực hiện stage sau; không lưu output chỉ để chứng minh một dòng code hoạt động.
-- Debug và exploratory runs có thể bị ghi đè. Chỉ giữ checkpoint/output của candidate được chọn và final multi-seed runs.
+- Debug và exploratory runs có thể bị ghi đè. Chỉ giữ checkpoint/output của candidate được chọn và final seed-42 runs.
 - Mỗi final run cần một record duy nhất chứa: model, seed, config, dataset fingerprint, best epoch, validation metric, parameter count, runtime, peak GPU memory và checkpoint/prediction paths.
 - Checkpoint neural phải đủ để load model với vocabulary và ordered label names tương ứng.
 
@@ -169,7 +169,7 @@ Với Stage 1, một script gồm các pha `load contract → audit rows/splits 
 | 3 | Shared PyTorch pipeline có đúng và neural baseline học được không? | Inspected batch, shared training loop, MLP checkpoint và metrics |
 | 4 | Sequence và self-attention models khác MLP thế nào? | BiLSTM/Transformer checkpoints, predictions và metrics |
 | 5 | Imbalance handling và threshold strategy thay đổi kết quả thế nào? | Models/predictions cần thiết và một bảng controlled experiments; threshold được chọn từ validation predictions |
-| 6 | Kết luận cuối có ổn định và trả lời research questions không? | Multi-seed comparison, efficiency/error analysis và final report |
+| 6 | Các hệ thống khác nhau thế nào và kết quả trả lời research questions ra sao? | Single-seed comparison, efficiency/error analysis và final report; nêu rõ limitation về stability |
 
 Stage là research milestone, không phải yêu cầu tạo package hoặc folder riêng. Không scaffold toàn bộ source tree từ đầu.
 
@@ -220,7 +220,7 @@ Project hoàn thành khi có evidence cho các kết quả sau, không phụ thu
 - Shared PyTorch data/training/evaluation pipeline chạy đúng.
 - Mean Pooling MLP, BiLSTM + Attention và Transformer Encoder đã được train và so sánh.
 - Standard BCE so với `pos_weight`, cùng fixed/global/per-label threshold, đã được kiểm tra có kiểm soát.
-- Final neural comparison có ba seeds, quality metrics và efficiency measurements.
+- Final neural comparison dùng seed `42`, có quality metrics và efficiency measurements; báo cáo nêu rõ chưa đánh giá multi-seed stability.
 - Error analysis và final report trả lời các research questions, nêu methodology, results, limitations và conclusion đúng mức evidence.
 - `Current Status` ghi `Project completed`.
 
