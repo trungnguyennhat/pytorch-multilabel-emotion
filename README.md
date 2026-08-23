@@ -19,16 +19,16 @@ GoEmotions contract và data analysis
 
 <!-- CURRENT_STATUS_START -->
 
-- **Project state:** In progress
-- **Current stage:** Stage 6 — Final controlled comparison, error analysis and report
-- **Completed with current evidence:** Stage 0–1 environment/data contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385. Stage 2 TF-IDF đạt clean test macro/micro-F1 0.2315/0.4171. Stage 3 Mean Pooling MLP đạt 0.3541/0.4788. Stage 4 đã hoàn thành: BiLSTM + Attention đạt 0.3880/0.4948; Transformer Encoder đạt 0.4366/0.5336. Stage 5 đã so sánh đủ Standard BCE và capped train-only `pos_weight` với fixed/global/per-label thresholds. Standard BCE + per-label thresholds được chọn bằng validation macro-F1 0.4813 và đạt test macro/micro-F1 0.4679/0.5374; `pos_weight` làm recall tăng nhưng precision và F1 tổng thể giảm.
-- **Current work package:** Thiết kế Stage 6 cho final single-seed neural comparison, efficiency measurements, research-slice/error analysis và final report
+- **Project state:** Project completed
+- **Current stage:** Stage 6 — Completed
+- **Completed with current evidence:** Stage 0–1 environment/data contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385. Stage 2 TF-IDF đạt clean test macro/micro-F1 0.2315/0.4171. Stage 3 Mean Pooling MLP đạt 0.3541/0.4788. Stage 4 đã hoàn thành: BiLSTM + Attention đạt 0.3880/0.4948; Transformer Encoder đạt 0.4366/0.5336. Stage 5 đã so sánh đủ Standard BCE và capped train-only `pos_weight` với fixed/global/per-label thresholds; Standard BCE + per-label thresholds được chọn bằng validation macro-F1 0.4813 và đạt test 0.4679/0.5374. Stage 6 đã tổng hợp single-seed comparison, parameter/runtime/GPU efficiency, per-label và research-slice/error analysis; báo cáo Project II 16 trang với 5 figures đã build và kiểm tra trực quan toàn bộ.
+- **Current work package:** None — minimum project scope completed
 - **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Chốt thiết kế Stage 6 trước implementation: dùng các final neural runs với seed `42`, tổng hợp quality và efficiency, rồi phân tích các research slices và failure modes từ outputs đã lưu
-- **Evidence required to complete current package:** Final single-seed neural comparison với macro/micro precision-recall-F1; parameter count, total training time và peak GPU memory trên cùng setup; error analysis theo text length, label cardinality, negation/ambiguity; final report trả lời các research questions và nêu rõ limitation do không đánh giá multi-seed stability
-- **Current evidence gap:** Chưa có bảng final comparison/efficiency thống nhất, slice/error analysis và final report được tạo trực tiếp từ run outputs
+- **Next action:** Optional only — người học review wording, bổ sung yêu cầu riêng của giảng viên hoặc cập nhật thông tin bìa nếu cần
+- **Evidence required to complete current package:** Satisfied
+- **Current evidence gap:** None trong scope đã duyệt; multi-seed stability được ghi rõ là limitation đã chủ động loại khỏi scope
 - **Blockers:** None
-- **Last updated:** 2026-08-23
+- **Last updated:** 2026-08-24
 
 ### Stage progress
 
@@ -38,7 +38,7 @@ GoEmotions contract và data analysis
 - [x] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
 - [x] Stage 4 — BiLSTM + Attention and Transformer Encoder
 - [x] Stage 5 — Imbalance and threshold experiments
-- [ ] Stage 6 — Final controlled comparison, error analysis and report
+- [x] Stage 6 — Final controlled comparison, error analysis and report
 
 <!-- CURRENT_STATUS_END -->
 

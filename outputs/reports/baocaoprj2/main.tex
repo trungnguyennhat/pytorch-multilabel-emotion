@@ -1,0 +1,319 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{makecell}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{tocloft}
+\usepackage{titlesec}
+
+\newcommand{\sectionbreak}{\clearpage}
+\geometry{top=2cm,bottom=2cm,left=2.5cm,right=2cm}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
+\graphicspath{{hinh/}}
+\setlist{nosep,leftmargin=1.5em}
+\setlength{\cftbeforesecskip}{2pt}
+\setlength{\cftbeforesubsecskip}{1pt}
+\setlength{\parindent}{1.2cm}
+\setlength{\parskip}{3pt}
+\tolerance=2000
+\emergencystretch=2em
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        {\Large ĐẠI HỌC BÁCH KHOA HÀ NỘI}\\[0.5cm]
+        {\textbf{\large TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.8cm]
+        \vspace{1cm}
+        \includegraphics[width=3.2cm]{hinh0.png}
+        \vspace{1cm}
+
+        {\Huge \textbf{BÁO CÁO PROJECT II}}
+
+        \vspace{0.8cm}
+        {\LARGE \textbf{Đề tài:}}
+        \vspace{0.3cm}
+
+        \parbox{0.92\textwidth}{
+            \centering
+            \Large\textbf{NGHIÊN CỨU SO SÁNH CÁC KIẾN TRÚC PYTORCH CHO BÀI TOÁN PHÂN LOẠI CẢM XÚC ĐA NHÃN TRÊN GOEMOTIONS}
+        }
+
+        \vfill
+        \begin{tabular}{rl}
+            \textbf{Người thực hiện:} & Nguyễn Nhật Trung \\[0.3cm]
+            \textbf{Giảng viên hướng dẫn:} & TS. Nguyễn Duy Hiệp
+        \end{tabular}
+        \vfill
+        {\large Hà Nội, tháng 08 năm 2026}
+    \end{center}
+\end{titlepage}
+
+\tableofcontents
+\clearpage
+
+\section{Giới thiệu}
+
+\subsection{Lý do chọn đề tài}
+
+Nhận diện cảm xúc trong văn bản là một thành phần quan trọng của các hệ thống phân tích phản hồi, theo dõi cộng đồng và xây dựng trợ lý hội thoại. Khác với sentiment analysis thường chỉ phân biệt tích cực, tiêu cực và trung tính, emotion classification cần mô tả các trạng thái chi tiết như vui mừng, biết ơn, tức giận, thất vọng hoặc bối rối. Một phát ngôn cũng có thể đồng thời biểu đạt nhiều cảm xúc, vì vậy đầu ra tự nhiên của bài toán là một tập nhãn thay vì duy nhất một lớp.
+
+GoEmotions là bộ dữ liệu gồm các bình luận tiếng Anh từ Reddit, được gán 27 loại cảm xúc cùng nhãn \textit{neutral} \cite{demszky2020}. Bản simplified được dùng trong project có 28 nhãn và official train/validation/test splits. Đây là bài toán khó do phân bố nhãn mất cân bằng mạnh, nhiều cảm xúc có ý nghĩa gần nhau và nội dung ngắn thường phụ thuộc vào ngữ cảnh không xuất hiện trong câu.
+
+Project khảo sát mức cải thiện khi chuyển từ biểu diễn TF-IDF tuyến tính sang ba kiến trúc neural huấn luyện từ đầu bằng PyTorch. Ngoài kiến trúc, nghiên cứu còn kiểm tra hai quyết định có ảnh hưởng trực tiếp tới multi-label classification: trọng số lớp dương trong loss và threshold biến xác suất thành dự đoán nhị phân.
+
+\subsection{Mục tiêu và câu hỏi nghiên cứu}
+
+Các mục tiêu chính gồm:
+\begin{itemize}
+    \item xây dựng baseline TF-IDF kết hợp One-vs-Rest Logistic Regression;
+    \item xây dựng Mean Pooling MLP, BiLSTM kết hợp attention và Transformer Encoder bằng custom PyTorch loop;
+    \item so sánh các mô hình theo macro/micro precision, recall và F1;
+    \item đánh giá Standard BCE so với capped \texttt{pos\_weight};
+    \item so sánh threshold cố định 0.5, global threshold và per-label thresholds;
+    \item phân tích hiệu năng theo độ dài câu, số nhãn thật và chi phí tính toán.
+\end{itemize}
+
+Các thí nghiệm neural sử dụng seed cố định 42. Project không dùng pretrained embedding hoặc pretrained language model, vì mục tiêu là quan sát sự khác biệt của chính các kiến trúc PyTorch trong một pipeline chung. Kết quả vì vậy là practical system comparison trong phạm vi cấu hình hiện tại, không phải một causal ablation hoàn toàn kiểm soát capacity và optimization.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{4cm}p{10.2cm}}
+        \toprule
+        \textbf{Thành phần} & \textbf{Mô tả} \\
+        \midrule
+        Prediction unit & Một bình luận tiếng Anh \\
+        Target & Vector multi-hot 28 chiều; mỗi nhãn là một binary target độc lập \\
+        Baseline & TF-IDF + One-vs-Rest Logistic Regression \\
+        Neural models & Mean Pooling MLP, BiLSTM + Attention, Transformer Encoder \\
+        Metric lựa chọn & Validation macro-F1; micro-F1 báo cáo song song \\
+        Final run & Seed 42, official splits với clean evaluation views \\
+        \bottomrule
+    \end{tabular}
+    \caption{Tóm tắt bài toán nghiên cứu}
+    \label{tab:problem-summary}
+\end{table}
+
+\section{Dữ liệu và phân tích khám phá}
+
+\subsection{Bộ dữ liệu GoEmotions}
+
+Bài báo gốc giới thiệu GoEmotions với khoảng 58 nghìn bình luận Reddit được gán nhãn thủ công \cite{demszky2020}. Project sử dụng configuration \texttt{simplified} từ nguồn \texttt{google-research-datasets/go\_emotions}. Mỗi dòng gồm nội dung \texttt{text}, danh sách label IDs và một \texttt{id}. Thứ tự 28 label names từ dataset feature được đóng băng và dùng thống nhất cho target, logit, probability, prediction, threshold và metric.
+
+Official splits có 43.410 mẫu train, 5.426 mẫu validation và 5.427 mẫu test. Data audit phát hiện exact duplicate text giữa các splits. Để tránh cùng một văn bản xuất hiện ở cả train và evaluation, project giữ nguyên train, loại 43 validation rows trùng train và 42 test rows trùng train hoặc clean validation. Clean views cuối cùng có kích thước 43.410/5.383/5.385. Không có sample được chuyển giữa các splits.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lrrr}
+        \toprule
+        \textbf{Split} & \textbf{Official rows} & \textbf{Excluded} & \textbf{Clean rows} \\
+        \midrule
+        Train & 43.410 & 0 & 43.410 \\
+        Validation & 5.426 & 43 & 5.383 \\
+        Test & 5.427 & 42 & 5.385 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Official splits và clean evaluation views}
+    \label{tab:data-splits}
+\end{table}
+
+\subsection{Phân bố nhãn}
+
+Hình~\ref{fig:label-distribution} cho thấy mức mất cân bằng lớn trong tập train. \textit{Neutral} xuất hiện vượt trội, trong khi \textit{grief}, \textit{pride}, \textit{relief} và \textit{nervousness} có rất ít mẫu. Vì macro-F1 cho mỗi nhãn trọng số bằng nhau, một số nhãn hiếm có thể ảnh hưởng đáng kể tới điểm tổng hợp dù support test rất nhỏ.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth]{label_distribution.png}
+    \caption{Phân bố support của 28 nhãn trong tập train}
+    \label{fig:label-distribution}
+\end{figure}
+
+Mỗi target là vector multi-hot kiểu floating point có shape $[28]$. Nếu một câu có cả \textit{caring} và \textit{optimism}, hai vị trí tương ứng đều bằng 1; các vị trí còn lại bằng 0. Do đó, đây là multi-label classification chứ không phải multi-class classification và tổng số nhãn dương trong một sample không bắt buộc bằng 1.
+
+\section{Phương pháp nghiên cứu}
+
+\subsection{Quy trình thực nghiệm}
+
+Pipeline chung thực hiện theo thứ tự: load data contract và clean splits; fit representation chỉ trên train; train model; đánh giá sau mỗi epoch trên validation; lưu checkpoint có validation macro-F1 tốt nhất; sau khi cấu hình được đóng băng mới đánh giá test. Vocabulary, TF-IDF và \texttt{pos\_weight} không sử dụng validation hoặc test. Threshold tuning chỉ đọc validation probabilities đã lưu, không forward model lại cho từng threshold.
+
+Đối với neural models, data flow chính có dạng:
+\begin{equation}
+\texttt{input\_ids},\ \texttt{attention\_mask}
+\rightarrow \texttt{embeddings}
+\rightarrow \texttt{pooled\_features}
+\rightarrow \texttt{logits}\in\mathbb{R}^{B\times 28}.
+\end{equation}
+Targets có shape $[B,28]$, dtype \texttt{float32} và nằm trên cùng device với logits. \texttt{BCEWithLogitsLoss} nhận logits trực tiếp; sigmoid chỉ được áp dụng ở evaluation để tạo probabilities, sau đó threshold tạo binary predictions.
+
+\subsection{TF-IDF và Logistic Regression}
+
+Baseline chuyển văn bản thành sparse TF-IDF unigram features với \texttt{min\_df=2}. Mỗi emotion label có một Logistic Regression classifier độc lập trong One-vs-Rest scheme. Hai ứng viên unigram và unigram--bigram được so sánh bằng validation macro-F1; unigram được chọn. Prediction cuối dùng threshold 0.5.
+
+\subsection{Mean Pooling MLP}
+
+Token IDs được ánh xạ thành embedding vectors. Padding positions bị loại bằng attention mask, sau đó masked mean pooling tạo một vector biểu diễn cố định cho mỗi câu. Vector này đi qua MLP để sinh 28 logits. Mô hình đơn giản và không mô hình hóa trực tiếp thứ tự từ, nên đóng vai trò neural baseline.
+
+\subsection{BiLSTM kết hợp attention}
+
+LSTM được đề xuất để học phụ thuộc dài hạn và giảm vấn đề suy giảm gradient trong recurrent networks \cite{hochreiter1997}. BiLSTM đọc chuỗi theo hai chiều, tạo contextual hidden states. Attention pooling học trọng số cho từng token và tổng hợp các hidden states thành biểu diễn câu; ý tưởng attention cho phép mô hình ưu tiên những phần liên quan thay vì nén mọi thông tin theo cùng một trọng số \cite{bahdanau2015}. Padding positions không tham gia attention weights.
+
+\subsection{Transformer Encoder}
+
+Transformer sử dụng self-attention thay cho recurrence để trao đổi thông tin giữa mọi vị trí trong chuỗi \cite{vaswani2017}. Mô hình trong project gồm token embeddings, positional encoding, hai encoder layers, bốn attention heads, hidden size 128 và feed-forward size 256. Masked mean pooling tổng hợp encoder outputs trước linear classification head. Đây là Transformer huấn luyện từ đầu, không phải BERT hoặc một pretrained Transformer.
+
+\subsection{Loss weighting và threshold}
+
+Standard BCE được giữ làm đối chứng. Với weighted BCE, mỗi label $j$ có:
+\begin{equation}
+    \texttt{pos\_weight}_j=\min\left(\frac{N_j-P_j}{P_j},50\right),
+\end{equation}
+trong đó $P_j$ là số positive train samples của label $j$, còn $N_j$ là tổng train samples. Trọng số lớn làm false negative của label hiếm bị phạt mạnh hơn, thường tăng recall nhưng có thể giảm precision.
+
+Ba threshold policies được kiểm tra cho mỗi loss: fixed 0.5, một global threshold và 28 per-label thresholds. Search grid là 0.05 đến 0.95 với bước 0.05. Khi nhiều threshold có cùng validation F1, ưu tiên giá trị gần 0.5 rồi ưu tiên giá trị cao hơn. Toàn bộ strategy được chọn bằng validation macro-F1; test chỉ được tính sau khi strategy đóng băng.
+
+\section{Thiết kế đánh giá}
+
+\subsection{Các chỉ số}
+
+Với mỗi label, precision, recall và F1 được tính từ TP, FP và FN:
+\begin{align}
+    \text{Precision} &= \frac{TP}{TP+FP},\\
+    \text{Recall} &= \frac{TP}{TP+FN},\\
+    \text{F1} &= 2\frac{\text{Precision}\times\text{Recall}}
+    {\text{Precision}+\text{Recall}}.
+\end{align}
+
+Macro averaging tính metric riêng cho từng label rồi lấy trung bình, vì vậy phản ánh cả label hiếm. Micro averaging cộng TP, FP và FN của toàn bộ labels trước khi tính metric, nên chịu ảnh hưởng lớn hơn từ label phổ biến. Validation macro-F1 là tiêu chí lựa chọn chính; micro-F1 luôn được báo cáo song song.
+
+\subsection{Efficiency và error slices}
+
+Efficiency gồm trainable parameter count, tổng thời gian huấn luyện và peak GPU memory do PyTorch ghi nhận trên cùng setup. Số liệu không phải inference benchmark và chỉ có ý nghĩa trong môi trường phần cứng hiện tại.
+
+Error analysis dùng fixed-threshold predictions để so sánh ba neural architectures. Độ dài được tính bằng số token tách theo khoảng trắng với ba nhóm 1--10, 11--20 và trên 20. Label cardinality được chia thành 1, 2 và từ 3 nhãn thật trở lên. Vì các nhóm này được định nghĩa trước từ input/target chứ không dựa trên test performance, chúng không tham gia model selection. Metric slice là sample-level F1, thích hợp để đo mức khớp giữa tập nhãn thật và tập nhãn dự đoán của từng sample.
+
+Các ví dụ negation, nhãn hiếm, nhiều nhãn và mơ hồ được dùng để diễn giải định tính. GoEmotions không cung cấp ground-truth category cho ``ambiguity'' hoặc ``sarcasm'', nên các mô tả này không được dùng như một metric định lượng.
+
+\section{Kết quả và thảo luận}
+
+\subsection{So sánh các kiến trúc}
+
+\input{generated_tables.tex}
+
+Bảng~\ref{tab:model-results} và Hình~\ref{fig:model-comparison} dùng cùng Standard BCE và threshold 0.5. TF-IDF có macro precision cao nhất (0.6293) nhưng macro recall chỉ đạt 0.1688, cho thấy baseline dự đoán thận trọng và bỏ sót nhiều nhãn. Ba neural models tăng recall và F1 theo thứ tự MLP, BiLSTM và Transformer. Transformer đạt test macro/micro-F1 0.4366/0.5336, cao hơn BiLSTM 0.0485/0.0389 và cao hơn MLP 0.0824/0.0549.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{model_comparison.png}
+    \caption{So sánh chất lượng bốn kiến trúc tại threshold 0.5}
+    \label{fig:model-comparison}
+\end{figure}
+
+Kết quả cho thấy biểu diễn dense học từ dữ liệu cải thiện khả năng phát hiện nhãn dương so với TF-IDF. BiLSTM tận dụng thứ tự token tốt hơn mean pooling, còn self-attention của Transformer cho kết quả cao nhất trong cấu hình hiện tại. Tuy nhiên, do capacity và optimization không hoàn toàn giống nhau, kết quả chỉ chứng minh system nào tốt hơn trong experiment, không tách riêng causal effect của từng cơ chế kiến trúc.
+
+\subsection{Ảnh hưởng của imbalance và threshold}
+
+Hình~\ref{fig:threshold-study} trực quan hóa Bảng~\ref{tab:threshold-results}. Standard BCE với per-label thresholds được chọn vì có validation macro-F1 0.4813. Khi áp dụng strategy đã đóng băng lên test, macro-F1 tăng từ 0.4366 lên 0.4679 và micro-F1 tăng từ 0.5336 lên 0.5374. Global threshold 0.25 đạt test micro-F1 0.5469, nhưng không được đổi thành strategy chính dựa trên test vì primary selection metric đã được xác định là validation macro-F1.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{threshold_study.png}
+    \caption{Tác động của loss weighting và threshold trên Transformer}
+    \label{fig:threshold-study}
+\end{figure}
+
+Weighted BCE tại threshold 0.5 tăng test macro recall từ 0.3933 lên 0.6287 nhưng macro precision giảm từ 0.5301 xuống 0.2850, làm macro-F1 giảm còn 0.3779. Điều này cho thấy capped \texttt{pos\_weight} làm model dự đoán tích cực quá mức. Threshold tuning giảm một phần tác động này, nhưng weighted variants vẫn không vượt Standard BCE với per-label thresholds theo tiêu chí lựa chọn chính.
+
+\subsection{Phân tích per-label}
+
+Hình~\ref{fig:per-label} sắp xếp labels theo thay đổi F1 sau threshold tuning. Có 19/28 labels cải thiện, 6 giảm và 3 giữ nguyên. Các mức tăng đáng chú ý gồm \textit{grief}, \textit{caring}, \textit{annoyance}, \textit{disappointment} và \textit{anger}. Tuy nhiên, \textit{grief} chỉ có 5 positive test samples; mức tăng F1 lớn của label này không đủ để kết luận strategy sẽ ổn định trên dữ liệu khác. \textit{Relief} giảm F1 và cũng chỉ có 11 samples, minh họa độ bất định của threshold tuning ở label cực hiếm.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth]{per_label_f1.png}
+    \caption{Per-label F1 của Transformer trước và sau threshold tuning}
+    \label{fig:per-label}
+\end{figure}
+
+\subsection{Phân tích theo đặc điểm sample}
+
+Hình~\ref{fig:slices} cho thấy sample-level F1 giảm khi câu dài hơn và khi số nhãn thật tăng. Trên cả sáu groups, Transformer cao hơn BiLSTM và MLP. Với nhóm từ ba nhãn trở lên, chỉ có 63 test samples nên kết quả được xem là bằng chứng mô tả, không phải kết luận ổn định. Quan sát này không ủng hộ giả thuyết đơn giản rằng sequence models tự động có lợi thế tương đối lớn hơn trên câu dài: cả ba model đều giảm, còn thứ tự giữa chúng không đổi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.99\textwidth]{slice_performance.png}
+    \caption{Sample-level F1 theo độ dài và label cardinality}
+    \label{fig:slices}
+\end{figure}
+
+\subsection{Efficiency}
+
+Bảng~\ref{tab:efficiency} cho thấy MLP có ít tham số và peak GPU memory thấp nhất. BiLSTM có nhiều tham số nhất và training time dài nhất trong ba standard runs. Transformer dùng GPU memory cao nhất nhưng thời gian train ghi nhận thấp hơn BiLSTM và gần MLP, đồng thời đạt F1 tốt nhất. Sự khác biệt thời gian còn phụ thuộc best epoch và mức độ song song hóa; do đó không nên diễn giải đây là benchmark tốc độ thuần túy của kiến trúc.
+
+\subsection{Các failure modes chính}
+
+Bảng~\ref{tab:error-examples} minh họa bốn dạng khó: negation, bỏ sót label hiếm, sample có nhiều nhãn và các cảm xúc gần nghĩa. Model đôi khi nhận diện một từ khóa cảm xúc nhưng không biểu diễn đúng phạm vi phủ định; ở sample nhiều nhãn, model thường chỉ dự đoán nhãn nổi bật nhất. Các cặp như \textit{sadness}/\textit{remorse}, \textit{excitement}/\textit{optimism} hoặc \textit{gratitude}/\textit{admiration} có ranh giới ngữ nghĩa gần và có thể cùng hợp lý trong ngữ cảnh ngắn.
+
+Error examples chỉ là minh họa được chọn bằng quy tắc cố định từ prediction errors. Chúng không chứng minh nguyên nhân nội tại của model và không được dùng để thay thế thống kê per-label hoặc slice metrics.
+
+\section{Hạn chế của nghiên cứu}
+\label{sec:limitations}
+
+Nghiên cứu có các hạn chế sau:
+\begin{itemize}
+    \item Các neural architectures chỉ chạy với seed 42, vì vậy chưa đo mean/standard deviation và chưa chứng minh độ ổn định giữa các lần khởi tạo.
+    \item Model huấn luyện embedding từ đầu và không dùng pretrained language model; kết quả không đại diện cho mức tốt nhất có thể đạt trên GoEmotions.
+    \item Emotion annotation có tính chủ quan, nhiều nhãn chồng lấn về ý nghĩa và câu Reddit ngắn có thể thiếu ngữ cảnh.
+    \item Metric của label cực hiếm biến động mạnh; ví dụ test support của \textit{grief} chỉ bằng 5.
+    \item Per-label thresholds có nhiều degrees of freedom và có thể khớp quá mức với validation, đặc biệt ở labels ít mẫu.
+    \item Negation/ambiguity analysis dùng heuristic và ví dụ định tính, không dựa trên annotation riêng cho các hiện tượng này.
+    \item Parameter count, runtime và GPU memory chỉ đại diện cho implementation, best epoch, batch size và hardware của project hiện tại.
+\end{itemize}
+
+\section{Kết luận}
+
+Project đã xây dựng và đánh giá bốn hệ thống trên cùng clean evaluation policy. Neural models đều cải thiện macro/micro-F1 so với TF-IDF baseline. Mean Pooling MLP đạt 0.3541/0.4788, BiLSTM + Attention đạt 0.3880/0.4948 và Transformer Encoder đạt 0.4366/0.5336 tại threshold 0.5. Transformer vì vậy là kiến trúc mạnh nhất trong các standard runs hiện tại.
+
+Đối với imbalance, capped \texttt{pos\_weight} tăng recall nhưng làm precision giảm quá mạnh, nên không cải thiện F1 tổng thể. Ngược lại, tuning threshold trên validation probabilities cải thiện rõ macro-F1. Standard BCE kết hợp per-label thresholds là strategy được chọn, đạt test macro/micro-F1 0.4679/0.5374.
+
+Error analysis cho thấy hiệu năng giảm khi văn bản dài hơn hoặc sample có nhiều nhãn, trong khi labels cực hiếm và cảm xúc gần nghĩa vẫn là nguồn lỗi chính. Transformer tạo trade-off tốt nhất giữa chất lượng và chi phí trong setup hiện tại: F1 cao nhất, runtime không cao hơn BiLSTM, nhưng dùng peak GPU memory lớn nhất. Các kết luận này cần được đọc cùng hạn chế single-seed và không sử dụng pretrained models.
+
+\begin{thebibliography}{9}
+
+\bibitem{demszky2020}
+D. Demszky, D. Movshovitz-Attias, J. Ko, A. Cowen, G. Nemade, and S. Ravi,
+``GoEmotions: A Dataset of Fine-Grained Emotions,''
+\textit{Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics},
+pp. 4040--4054, 2020. DOI: \href{https://doi.org/10.18653/v1/2020.acl-main.372}{10.18653/v1/2020.acl-main.372}.
+
+\bibitem{hochreiter1997}
+S. Hochreiter and J. Schmidhuber,
+``Long Short-Term Memory,''
+\textit{Neural Computation}, vol. 9, no. 8, pp. 1735--1780, 1997.
+DOI: \href{https://doi.org/10.1162/neco.1997.9.8.1735}{10.1162/neco.1997.9.8.1735}.
+
+\bibitem{bahdanau2015}
+D. Bahdanau, K. Cho, and Y. Bengio,
+``Neural Machine Translation by Jointly Learning to Align and Translate,''
+\textit{International Conference on Learning Representations}, 2015.
+\url{https://arxiv.org/abs/1409.0473}.
+
+\bibitem{vaswani2017}
+A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez,
+L. Kaiser, and I. Polosukhin,
+``Attention Is All You Need,''
+\textit{Advances in Neural Information Processing Systems}, vol. 30, 2017.
+\url{https://research.google/pubs/attention-is-all-you-need/}.
+
+\end{thebibliography}
+
+\end{document}
