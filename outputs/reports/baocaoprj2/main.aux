@@ -8,59 +8,65 @@
 \babel@aux{vietnamese}{}
 \citation{demszky2020}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Giới thiệu}{2}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Lý do chọn đề tài}{2}{subsection.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Mục tiêu và câu hỏi nghiên cứu}{2}{subsection.1.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Tóm tắt bài toán nghiên cứu}}{2}{table.1}\protected@file@percent }
-\newlabel{tab:problem-summary}{{1}{2}{Tóm tắt bài toán nghiên cứu}{table.1}{}}
-\citation{demszky2020}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Dữ liệu và phân tích khám phá}{3}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Bộ dữ liệu GoEmotions}{3}{subsection.2.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Official splits và clean evaluation views}}{3}{table.2}\protected@file@percent }
-\newlabel{tab:data-splits}{{2}{3}{Official splits và clean evaluation views}{table.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Phân bố nhãn}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Bài toán và động lực}{2}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Mục tiêu của báo cáo}{2}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Dữ liệu và quy trình xử lý}{3}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Nguồn dữ liệu và cấu trúc nhãn}{3}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Kiểm tra và tạo clean splits}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Số mẫu trước và sau khi tạo text-disjoint evaluation views}}{3}{table.1}\protected@file@percent }
+\newlabel{tab:clean-splits}{{1}{3}{Số mẫu trước và sau khi tạo text-disjoint evaluation views}{table.1}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Phân bố support của 28 nhãn trong tập train}}{4}{figure.1}\protected@file@percent }
 \newlabel{fig:label-distribution}{{1}{4}{Phân bố support của 28 nhãn trong tập train}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Tokenize và build vocabulary cho mô hình train-from-scratch}{4}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Biểu diễn TF-IDF}{5}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}WordPiece cho BERT pretrained}{5}{subsection.2.5}\protected@file@percent }
 \citation{hochreiter1997}
 \citation{bahdanau2015}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Các hệ thống phân loại}{6}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Luồng dự đoán chung}{6}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}TF-IDF và Logistic Regression}{6}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Mean Pooling MLP}{6}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}BiLSTM kết hợp attention}{6}{subsection.3.4}\protected@file@percent }
 \citation{vaswani2017}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Phương pháp nghiên cứu}{5}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Quy trình thực nghiệm}{5}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}TF-IDF và Logistic Regression}{5}{subsection.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Mean Pooling MLP}{5}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}BiLSTM kết hợp attention}{5}{subsection.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Transformer Encoder}{5}{subsection.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Loss weighting và threshold}{6}{subsection.3.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Thiết kế đánh giá}{7}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Các chỉ số}{7}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Efficiency và error slices}{7}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Kết quả và thảo luận}{8}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}So sánh các kiến trúc}{8}{subsection.5.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Kết quả test của bốn kiến trúc tại threshold 0.5}}{8}{table.3}\protected@file@percent }
-\newlabel{tab:model-results}{{3}{8}{Kết quả test của bốn kiến trúc tại threshold 0.5}{table.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Kết quả test của sáu chiến lược loss và threshold}}{8}{table.4}\protected@file@percent }
-\newlabel{tab:threshold-results}{{4}{8}{Kết quả test của sáu chiến lược loss và threshold}{table.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Chi phí huấn luyện của ba kiến trúc neural trên cùng thiết bị}}{8}{table.5}\protected@file@percent }
-\newlabel{tab:efficiency}{{5}{8}{Chi phí huấn luyện của ba kiến trúc neural trên cùng thiết bị}{table.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Một số lỗi của Transformer với per-label thresholds}}{8}{table.6}\protected@file@percent }
-\newlabel{tab:error-examples}{{6}{8}{Một số lỗi của Transformer với per-label thresholds}{table.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces So sánh chất lượng bốn kiến trúc tại threshold 0.5}}{9}{figure.2}\protected@file@percent }
-\newlabel{fig:model-comparison}{{2}{9}{So sánh chất lượng bốn kiến trúc tại threshold 0.5}{figure.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Ảnh hưởng của imbalance và threshold}{9}{subsection.5.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Tác động của loss weighting và threshold trên Transformer}}{10}{figure.3}\protected@file@percent }
-\newlabel{fig:threshold-study}{{3}{10}{Tác động của loss weighting và threshold trên Transformer}{figure.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Phân tích per-label}{10}{subsection.5.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Per-label F1 của Transformer trước và sau threshold tuning}}{11}{figure.4}\protected@file@percent }
-\newlabel{fig:per-label}{{4}{11}{Per-label F1 của Transformer trước và sau threshold tuning}{figure.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Phân tích theo đặc điểm sample}{11}{subsection.5.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Sample-level F1 theo độ dài và label cardinality}}{12}{figure.5}\protected@file@percent }
-\newlabel{fig:slices}{{5}{12}{Sample-level F1 theo độ dài và label cardinality}{figure.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Efficiency}{12}{subsection.5.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Các failure modes chính}{12}{subsection.5.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Hạn chế của nghiên cứu}{13}{section.6}\protected@file@percent }
-\newlabel{sec:limitations}{{6}{13}{Hạn chế của nghiên cứu}{section.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Kết luận}{14}{section.7}\protected@file@percent }
+\citation{devlin2019}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Transformer Encoder huấn luyện từ đầu}{7}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}BERT-base-cased pretrained}{7}{subsection.3.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Khác biệt chính về biểu diễn của năm hệ thống}}{8}{table.2}\protected@file@percent }
+\newlabel{tab:representation-summary}{{2}{8}{Khác biệt chính về biểu diễn của năm hệ thống}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Hyperparameter của bốn neural models}}{8}{table.3}\protected@file@percent }
+\newlabel{tab:neural-hyperparameters}{{3}{8}{Hyperparameter của bốn neural models}{table.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Huấn luyện và đánh giá}{9}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Vai trò của ba split}{9}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Các chỉ số}{9}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Threshold và cách tuning}{9}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Kết quả và diễn giải}{10}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}So sánh tại threshold 0.5}{10}{subsection.5.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Kết quả test của năm hệ thống tại threshold 0.5}}{10}{table.4}\protected@file@percent }
+\newlabel{tab:model-results}{{4}{10}{Kết quả test của năm hệ thống tại threshold 0.5}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Fixed 0.5 và threshold được chọn bằng validation macro-F1}}{10}{table.5}\protected@file@percent }
+\newlabel{tab:threshold-results}{{5}{10}{Fixed 0.5 và threshold được chọn bằng validation macro-F1}{table.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces So sánh năm hệ thống tại threshold 0.5}}{11}{figure.2}\protected@file@percent }
+\newlabel{fig:model-comparison}{{2}{11}{So sánh năm hệ thống tại threshold 0.5}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Kết quả sau threshold tuning}{11}{subsection.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Macro-F1 tại fixed 0.5 và sau threshold tuning cho năm hệ thống}}{12}{figure.3}\protected@file@percent }
+\newlabel{fig:threshold-study}{{3}{12}{Macro-F1 tại fixed 0.5 và sau threshold tuning cho năm hệ thống}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Ảnh hưởng của \texttt  {pos\_weight}}{12}{subsection.5.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Ảnh hưởng của \texttt  {pos\_weight} và threshold trên Transformer}}{12}{table.6}\protected@file@percent }
+\newlabel{tab:pos-weight-results}{{6}{12}{Ảnh hưởng của \texttt {pos\_weight} và threshold trên Transformer}{table.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Phân tích theo từng nhãn}{13}{subsection.5.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Per-label F1 của Transformer trước và sau threshold tuning}}{13}{figure.4}\protected@file@percent }
+\newlabel{fig:per-label}{{4}{13}{Per-label F1 của Transformer trước và sau threshold tuning}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Phân tích theo đặc điểm mẫu}{13}{subsection.5.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Sample-level F1 theo độ dài và label cardinality}}{14}{figure.5}\protected@file@percent }
+\newlabel{fig:slices}{{5}{14}{Sample-level F1 theo độ dài và label cardinality}{figure.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Các failure modes chính}{14}{subsection.5.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Một số lỗi của Transformer với per-label thresholds}}{14}{table.7}\protected@file@percent }
+\newlabel{tab:error-examples}{{7}{14}{Một số lỗi của Transformer với per-label thresholds}{table.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Hạn chế}{15}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Kết luận}{16}{section.7}\protected@file@percent }
 \bibcite{demszky2020}{1}
 \bibcite{hochreiter1997}{2}
 \bibcite{bahdanau2015}{3}
 \bibcite{vaswani2017}{4}
-\gdef \@abspage@last{16}
+\bibcite{devlin2019}{5}
+\gdef \@abspage@last{18}

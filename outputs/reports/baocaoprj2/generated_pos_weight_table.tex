@@ -1,0 +1,16 @@
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{llrrr}
+\toprule
+\textbf{Loss} & \textbf{Threshold} & \textbf{Macro P} & \textbf{Macro R} & \textbf{Macro F1} \\
+\midrule
+BCE thường & Fixed 0.5 & 0.5301 & 0.3933 & 0.4366 \\
+BCE thường & Per-label tuned & 0.5128 & 0.4725 & 0.4679 \\
+BCE + \texttt{pos\_weight} & Fixed 0.5 & 0.2850 & 0.6287 & 0.3779 \\
+BCE + \texttt{pos\_weight} & Per-label tuned & 0.3880 & 0.5207 & 0.4360 \\
+\bottomrule
+\end{tabular}
+\caption{Ảnh hưởng của \texttt{pos\_weight} và threshold trên Transformer}
+\label{tab:pos-weight-results}
+\end{table}

@@ -25,10 +25,20 @@ MODEL_DIRS = {
     "Mean Pooling MLP": ROOT / "outputs" / "mean_pooling_mlp",
     "BiLSTM + Attention": ROOT / "outputs" / "bilstm_attention",
     "Transformer Encoder": ROOT / "outputs" / "transformer_encoder",
+    "BERT pretrained": ROOT / "outputs" / "bert_pretrained",
 }
 NEURAL_MODELS = ["Mean Pooling MLP", "BiLSTM + Attention", "Transformer Encoder"]
-THRESHOLD_PATH = ROOT / "outputs" / "imbalance_threshold" / "experiments.json"
-COLORS = ["#4C78A8", "#F58518", "#54A24B", "#E45756"]
+THRESHOLD_PATH = ROOT / "outputs" / "architecture_thresholds" / "experiments.json"
+IMBALANCE_THRESHOLD_PATH = ROOT / "outputs" / "imbalance_threshold" / "experiments.json"
+IMBALANCE_THRESHOLD_PATH = ROOT / "outputs" / "imbalance_threshold" / "experiments.json"
+COLORS = ["#4C78A8", "#F58518", "#54A24B", "#E45756", "#B279A2"]
+ARCHITECTURE_KEYS = {
+    "TF-IDF + LR": "tfidf_logreg",
+    "Mean Pooling MLP": "mean_pooling_mlp",
+    "BiLSTM + Attention": "bilstm_attention",
+    "Transformer Encoder": "transformer_encoder",
+    "BERT pretrained": "bert_pretrained",
+}
 
 
 def load_json(path: Path) -> dict:
@@ -51,6 +61,144 @@ def latex_escape(value: object) -> str:
         "^": r"\textasciicircum{}",
     }
     return "".join(replacements.get(char, char) for char in text)
+
+
+def write_method_tables(contract: dict, runs: dict) -> None:
+    split_rows = []
+    for split_name, display_name in (
+        ("train", "Train"),
+        ("validation", "Validation"),
+        ("test", "Test"),
+    ):
+        policy = contract["evaluation_policy"]["splits"][split_name]
+        official = policy["official_num_rows"]
+        clean = policy["clean_num_rows"]
+        split_rows.append(
+            f"{display_name} & {official:,} & {official - clean:,} & {clean:,} \\\\"
+        )
+    split_table = [
+        r"\begin{table}[H]", r"\centering", r"\small",
+        r"\begin{tabular}{lrrr}", r"\toprule",
+        r"\textbf{Split} & \textbf{Official} & \textbf{Loại do trùng xuyên split} & \textbf{Clean} \\",
+        r"\midrule", *split_rows, r"\bottomrule", r"\end{tabular}",
+        r"\caption{Số mẫu trước và sau khi tạo text-disjoint evaluation views}",
+        r"\label{tab:clean-splits}", r"\end{table}", "",
+    ]
+    (REPORT_DIR / "generated_clean_split_table.tex").write_text(
+        "\n".join(split_table), encoding="utf-8"
+    )
+
+    mlp = runs["Mean Pooling MLP"]
+    bilstm = runs["BiLSTM + Attention"]
+    transformer = runs["Transformer Encoder"]
+    bert = runs["BERT pretrained"]
+    rows = [
+        (
+            "MLP", mlp["model_config"]["embedding_dim"],
+            mlp["model_config"]["hidden_dim"], "1 MLP", "--",
+            mlp["model_config"]["dropout"], mlp["training_config"],
+            mlp["preprocessing"]["max_length"], "--",
+        ),
+        (
+            "BiLSTM", bilstm["model_config"]["embedding_dim"],
+            f"{bilstm['model_config']['lstm_hidden_dim']}/hướng", "1 BiLSTM",
+            "--", bilstm["model_config"]["dropout"], bilstm["training_config"],
+            bilstm["preprocessing"]["max_length"], "--",
+        ),
+        (
+            "Transformer", transformer["model_config"]["d_model"],
+            transformer["model_config"]["d_model"],
+            f"{transformer['model_config']['num_encoder_layers']} encoder",
+            transformer["model_config"]["num_heads"],
+            transformer["model_config"]["dropout"], transformer["training_config"],
+            transformer["preprocessing"]["max_length"], "--",
+        ),
+        (
+            "BERT-base-cased", 768, 768, "12 encoder", 12, 0.1,
+            bert["training_config"], bert["preprocessing"]["max_length"], "10\\%",
+        ),
+    ]
+    table_rows = []
+    for name, embedding, hidden, layers, heads, dropout, training, max_length, warmup in rows:
+        epochs = training.get("max_epochs", training.get("maximum_epochs", training.get("epochs")))
+        lr = training["learning_rate"]
+        lr_text = r"$10^{-3}$" if lr == 0.001 else r"$5\times10^{-5}$"
+        table_rows.append(
+            f"{name} & {embedding} & {hidden} & {layers} & {heads} & {dropout} & "
+            f"{training['optimizer']} & {lr_text} & {training['batch_size']} & "
+            f"{epochs} & {max_length} & {warmup} \\\\"
+        )
+    hyper_table = [
+        r"\begin{table}[H]", r"\centering", r"\scriptsize",
+        r"\setlength{\tabcolsep}{2.4pt}",
+        r"\resizebox{\textwidth}{!}{%",
+        r"\begin{tabular}{lrrrrrlrrrrr}", r"\toprule",
+        r"\textbf{Model} & \textbf{Emb.} & \textbf{Hidden} & \textbf{Layers} & \textbf{Heads} & \textbf{Dropout} & \textbf{Optimizer} & \textbf{LR} & \textbf{Batch} & \textbf{Epochs} & \textbf{Max len.} & \textbf{Warmup} \\",
+        r"\midrule", *table_rows, r"\bottomrule", r"\end{tabular}%", r"}",
+        r"\caption{Hyperparameter của bốn neural models}",
+        r"\label{tab:neural-hyperparameters}", r"\end{table}", "",
+    ]
+    (REPORT_DIR / "generated_hyperparameters_table.tex").write_text(
+        "\n".join(hyper_table), encoding="utf-8"
+    )
+
+
+def write_pos_weight_table() -> None:
+    experiments = load_json(IMBALANCE_THRESHOLD_PATH)["experiments"]
+    by_name = {item["name"]: item for item in experiments}
+    configurations = (
+        ("BCE thường", "Fixed 0.5", "standard_fixed"),
+        ("BCE thường", "Per-label tuned", "standard_per_label"),
+        (r"BCE + \texttt{pos\_weight}", "Fixed 0.5", "weighted_fixed"),
+        (r"BCE + \texttt{pos\_weight}", "Per-label tuned", "weighted_per_label"),
+    )
+    rows = []
+    for loss, threshold, key in configurations:
+        macro = by_name[key]["test"]["macro"]
+        rows.append(
+            f"{loss} & {threshold} & {macro['precision']:.4f} & "
+            f"{macro['recall']:.4f} & {macro['f1']:.4f} \\\\"
+        )
+    table = [
+        r"\begin{table}[H]", r"\centering", r"\small",
+        r"\begin{tabular}{llrrr}", r"\toprule",
+        r"\textbf{Loss} & \textbf{Threshold} & \textbf{Macro P} & \textbf{Macro R} & \textbf{Macro F1} \\",
+        r"\midrule", *rows, r"\bottomrule", r"\end{tabular}",
+        r"\caption{Ảnh hưởng của \texttt{pos\_weight} và threshold trên Transformer}",
+        r"\label{tab:pos-weight-results}", r"\end{table}", "",
+    ]
+    (REPORT_DIR / "generated_pos_weight_table.tex").write_text(
+        "\n".join(table), encoding="utf-8"
+    )
+
+
+def write_pos_weight_table() -> None:
+    experiments = load_json(IMBALANCE_THRESHOLD_PATH)["experiments"]
+    by_name = {item["name"]: item for item in experiments}
+    configurations = (
+        ("BCE thường", "Fixed 0.5", "standard_fixed"),
+        ("BCE thường", "Per-label tuned", "standard_per_label"),
+        (r"BCE + \texttt{pos\_weight}", "Fixed 0.5", "weighted_fixed"),
+        (r"BCE + \texttt{pos\_weight}", "Per-label tuned", "weighted_per_label"),
+    )
+    rows = []
+    for loss, threshold, key in configurations:
+        macro = by_name[key]["test"]["macro"]
+        rows.append(
+            f"{loss} & {threshold} & {macro['precision']:.4f} & "
+            f"{macro['recall']:.4f} & {macro['f1']:.4f} \\\\"
+        )
+    table = [
+        r"\begin{table}[H]", r"\centering", r"\small",
+        r"\begin{tabular}{llrrr}", r"\toprule",
+        r"\textbf{Loss} & \textbf{Threshold} & \textbf{Macro P} & \textbf{Macro R} & \textbf{Macro F1} \\",
+        r"\midrule", *rows, r"\bottomrule", r"\end{tabular}",
+        r"\caption{Ảnh hưởng của \texttt{pos\_weight} và threshold trên Transformer}",
+        r"\label{tab:pos-weight-results}", r"\end{table}", "",
+    ]
+    (REPORT_DIR / "generated_pos_weight_table.tex").write_text(
+        "\n".join(table), encoding="utf-8"
+    )
 
 
 def clean_splits(contract: dict):
@@ -113,19 +261,25 @@ def load_artifacts(contract: dict):
     predictions = {
         name: np.load(path / "predictions.npz") for name, path in MODEL_DIRS.items()
     }
-    expected_shape = (5385, len(label_names))
-    neural_targets = []
-    for name in NEURAL_MODELS:
+    expected_shapes = {
+        "validation": (5383, len(label_names)),
+        "test": (5385, len(label_names)),
+    }
+    reference_targets = {}
+    for name in MODEL_DIRS:
         bundle = predictions[name]
-        if bundle["test_predictions"].shape != expected_shape:
-            raise RuntimeError(f"Unexpected test prediction shape for {name}")
-        if bundle["test_targets"].shape != expected_shape:
-            raise RuntimeError(f"Unexpected test target shape for {name}")
-        neural_targets.append(bundle["test_targets"].astype(np.int8))
+        for split, expected_shape in expected_shapes.items():
+            if bundle[f"{split}_probabilities"].shape != expected_shape:
+                raise RuntimeError(f"Unexpected {split} probability shape for {name}")
+            if bundle[f"{split}_targets"].shape != expected_shape:
+                raise RuntimeError(f"Unexpected {split} target shape for {name}")
+            targets = bundle[f"{split}_targets"].astype(np.int8)
+            if split not in reference_targets:
+                reference_targets[split] = targets
+            elif not np.array_equal(reference_targets[split], targets):
+                raise RuntimeError(f"{split.title()} targets differ for {name}")
         if runs[name]["label_names"] != label_names:
             raise RuntimeError(f"Label order differs for {name}")
-    if not all(np.array_equal(neural_targets[0], item) for item in neural_targets[1:]):
-        raise RuntimeError("Neural test targets differ")
     thresholds = load_json(THRESHOLD_PATH)
     if thresholds["label_names"] != label_names:
         raise RuntimeError("Threshold label order differs")
@@ -180,58 +334,49 @@ def plot_model_comparison(runs: dict) -> None:
         )
     values = np.asarray(values)
     x = np.arange(len(metrics))
-    width = 0.19
+    width = 0.16
     fig, ax = plt.subplots(figsize=(10.2, 5.6))
     for index, (name, scores) in enumerate(zip(runs, values)):
-        bars = ax.bar(x + (index - 1.5) * width, scores, width,
+        bars = ax.bar(x + (index - 2) * width, scores, width,
                       label=name, color=COLORS[index])
         ax.bar_label(bars, fmt="%.3f", padding=2, fontsize=7, rotation=90)
     ax.set_xticks(x, metrics)
     ax.set_ylim(0, 0.75)
     ax.set_ylabel("Điểm số trên test")
-    ax.set_title("So sánh bốn kiến trúc tại threshold 0.5")
+    ax.set_title("So sánh năm hệ thống tại threshold 0.5")
     ax.legend(ncol=2, loc="upper left")
     fig.tight_layout()
     save_figure(fig, "model_comparison.png")
 
 
 def plot_threshold_study(threshold_data: dict) -> None:
-    experiments = threshold_data["experiments"]
-    display = {
-        "standard_fixed": "Standard\n0.5",
-        "standard_global": "Standard\nglobal",
-        "standard_per_label": "Standard\nper-label",
-        "weighted_fixed": "Weighted\n0.5",
-        "weighted_global": "Weighted\nglobal",
-        "weighted_per_label": "Weighted\nper-label",
-    }
-    names = [display[item["name"]] for item in experiments]
-    metric_names = [("precision", "Precision"), ("recall", "Recall"), ("f1", "F1")]
-    x = np.arange(len(experiments))
-    width = 0.25
+    by_name = {item["name"]: item for item in threshold_data["experiments"]}
+    names = list(ARCHITECTURE_KEYS)
+    fixed = [by_name[f"{key}_fixed"]["test"]["macro"]["f1"] for key in ARCHITECTURE_KEYS.values()]
+    tuned = [
+        by_name[threshold_data["selected_by_architecture"][key]]["test"]["macro"]["f1"]
+        for key in ARCHITECTURE_KEYS.values()
+    ]
+    x = np.arange(len(names))
+    width = 0.36
     fig, ax = plt.subplots(figsize=(10.4, 5.8))
-    for offset, ((key, label), color) in enumerate(zip(metric_names, COLORS[:3])):
-        scores = [item["test"]["macro"][key] for item in experiments]
-        bars = ax.bar(x + (offset - 1) * width, scores, width, label=label, color=color)
-        ax.bar_label(bars, fmt="%.3f", padding=2, fontsize=7, rotation=90)
-    selected_index = [item["name"] for item in experiments].index(
-        threshold_data["selected_strategy"]
-    )
-    ax.axvspan(selected_index - 0.48, selected_index + 0.48,
-               color="#72B7B2", alpha=0.14, label="Được chọn bằng validation")
-    ax.set_xticks(x, names)
-    ax.set_ylim(0, 0.78)
-    ax.set_ylabel("Macro score trên test")
-    ax.set_title("Ảnh hưởng của loss weighting và threshold")
-    ax.legend(ncol=2, loc="upper right")
+    first = ax.bar(x - width / 2, fixed, width, label="Fixed 0.5", color="#4C78A8")
+    second = ax.bar(x + width / 2, tuned, width, label="Threshold chọn trên validation", color="#E45756")
+    ax.bar_label(first, fmt="%.3f", padding=2, fontsize=8)
+    ax.bar_label(second, fmt="%.3f", padding=2, fontsize=8)
+    ax.set_xticks(x, [name.replace(" ", "\n", 1) for name in names])
+    ax.set_ylim(0, 0.58)
+    ax.set_ylabel("Macro-F1 trên test")
+    ax.set_title("Macro-F1 trước và sau threshold tuning")
+    ax.legend(loc="upper left")
     fig.tight_layout()
     save_figure(fig, "threshold_study.png")
 
 
 def plot_per_label_f1(threshold_data: dict) -> None:
     by_name = {item["name"]: item for item in threshold_data["experiments"]}
-    fixed = by_name["standard_fixed"]["test"]["per_label"]
-    tuned = by_name["standard_per_label"]["test"]["per_label"]
+    fixed = by_name["transformer_encoder_fixed"]["test"]["per_label"]
+    tuned = by_name["transformer_encoder_per_label"]["test"]["per_label"]
     fixed_f1 = np.array([item["f1"] for item in fixed])
     tuned_f1 = np.array([item["f1"] for item in tuned])
     support = np.array([item["support"] for item in fixed])
@@ -349,13 +494,12 @@ def choose_error_examples(test_split, targets, tuned_predictions, label_names):
 
 
 def write_tables(runs: dict, thresholds: dict, examples: list[dict]) -> None:
-    lines = []
-    lines.extend([
+    lines = [
         r"\begin{table}[H]", r"\centering", r"\small", r"\setlength{\tabcolsep}{3.5pt}",
         r"\begin{tabular}{lrrrrrr}", r"\toprule",
         r"\textbf{Mô hình} & \textbf{Macro P} & \textbf{Macro R} & \textbf{Macro F1} & \textbf{Micro P} & \textbf{Micro R} & \textbf{Micro F1} \\",
         r"\midrule",
-    ])
+    ]
     for name, run in runs.items():
         test = run["results"]["test"]
         lines.append(
@@ -365,49 +509,37 @@ def write_tables(runs: dict, thresholds: dict, examples: list[dict]) -> None:
         )
     lines.extend([
         r"\bottomrule", r"\end{tabular}",
-        r"\caption{Kết quả test của bốn kiến trúc tại threshold 0.5}",
+        r"\caption{Kết quả test của năm hệ thống tại threshold 0.5}",
         r"\label{tab:model-results}", r"\end{table}", "",
-        r"\begin{table}[H]", r"\centering", r"\small", r"\setlength{\tabcolsep}{3.5pt}",
-        r"\begin{tabular}{lrrrrrr}", r"\toprule",
-        r"\textbf{Chiến lược} & \textbf{Macro P} & \textbf{Macro R} & \textbf{Macro F1} & \textbf{Micro P} & \textbf{Micro R} & \textbf{Micro F1} \\",
+        r"\begin{table}[H]", r"\centering", r"\small", r"\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{lrrrrl}", r"\toprule",
+        r"\textbf{Hệ thống} & \textbf{Fixed F1} & \textbf{Tuned F1} & \textbf{$\Delta$ F1} & \textbf{Micro F1} & \textbf{Chọn} \\",
         r"\midrule",
     ])
-    for experiment in thresholds["experiments"]:
-        test = experiment["test"]
-        marker = r"\textbf{" if experiment["name"] == thresholds["selected_strategy"] else ""
-        close = "}" if marker else ""
+    by_name = {item["name"]: item for item in thresholds["experiments"]}
+    for display_name, key in ARCHITECTURE_KEYS.items():
+        fixed = by_name[f"{key}_fixed"]
+        selected = by_name[thresholds["selected_by_architecture"][key]]
+        fixed_f1 = fixed["test"]["macro"]["f1"]
+        tuned_f1 = selected["test"]["macro"]["f1"]
         lines.append(
-            f"{marker}{latex_escape(experiment['name'])}{close} & {test['macro']['precision']:.4f} & "
-            f"{test['macro']['recall']:.4f} & {test['macro']['f1']:.4f} & "
-            f"{test['micro']['precision']:.4f} & {test['micro']['recall']:.4f} & "
-            f"{test['micro']['f1']:.4f} \\\\"
+            f"{latex_escape(display_name)} & {fixed_f1:.4f} & {tuned_f1:.4f} & "
+            f"{tuned_f1 - fixed_f1:+.4f} & {selected['test']['micro']['f1']:.4f} & "
+            f"{latex_escape(selected['threshold_strategy'].replace('_', '-'))} \\\\"
         )
     lines.extend([
         r"\bottomrule", r"\end{tabular}",
-        r"\caption{Kết quả test của sáu chiến lược loss và threshold}",
+        r"\caption{Fixed 0.5 và threshold được chọn bằng validation macro-F1}",
         r"\label{tab:threshold-results}", r"\end{table}", "",
-        r"\begin{table}[H]", r"\centering", r"\small",
-        r"\begin{tabular}{lrrrr}", r"\toprule",
-        r"\textbf{Mô hình} & \textbf{Tham số} & \textbf{Best epoch} & \textbf{Train (s)} & \textbf{Peak GPU (MB)} \\",
-        r"\midrule",
     ])
-    for name in NEURAL_MODELS:
-        run = runs[name]
-        efficiency = run["efficiency"]
-        lines.append(
-            f"{latex_escape(name)} & {efficiency['trainable_parameter_count']:,} & "
-            f"{run['selection']['best_epoch']} & {efficiency['training_seconds']:.1f} & "
-            f"{efficiency['peak_gpu_memory_mb']:.1f} \\\\"
-        )
-    lines.extend([
-        r"\bottomrule", r"\end{tabular}",
-        r"\caption{Chi phí huấn luyện của ba kiến trúc neural trên cùng thiết bị}",
-        r"\label{tab:efficiency}", r"\end{table}", "",
+    (REPORT_DIR / "generated_tables.tex").write_text("\n".join(lines), encoding="utf-8")
+
+    lines = [
         r"\begin{table}[H]", r"\centering", r"\footnotesize",
         r"\begin{tabular}{p{5.2cm}p{3.0cm}p{3.0cm}p{2.2cm}}", r"\toprule",
         r"\textbf{Văn bản} & \textbf{Nhãn thật} & \textbf{Dự đoán} & \textbf{Nhóm lỗi} \\",
         r"\midrule",
-    ])
+    ]
     for item in examples:
         text = item["text"]
         if len(text) > 145:
@@ -421,7 +553,7 @@ def write_tables(runs: dict, thresholds: dict, examples: list[dict]) -> None:
         r"\caption{Một số lỗi của Transformer với per-label thresholds}",
         r"\label{tab:error-examples}", r"\end{table}", "",
     ])
-    (REPORT_DIR / "generated_tables.tex").write_text("\n".join(lines), encoding="utf-8")
+    (REPORT_DIR / "generated_error_table.tex").write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:
@@ -430,15 +562,16 @@ def main() -> None:
     contract = load_json(CONTRACT_PATH)
     clean = clean_splits(contract)
     runs, predictions, thresholds = load_artifacts(contract)
+    write_method_tables(contract, runs)
+    write_pos_weight_table()
+    write_pos_weight_table()
     plot_label_distribution(clean["train"], contract["schema"]["label_names"])
     plot_model_comparison(runs)
     plot_threshold_study(thresholds)
     plot_per_label_f1(thresholds)
     plot_slice_performance(clean["test"], predictions)
-    selected = next(
-        item for item in thresholds["experiments"]
-        if item["name"] == thresholds["selected_strategy"]
-    )
+    selected_name = thresholds["selected_by_architecture"]["transformer_encoder"]
+    selected = next(item for item in thresholds["experiments"] if item["name"] == selected_name)
     selected_thresholds = np.asarray(selected["thresholds"], dtype=np.float32)
     transformer = predictions["Transformer Encoder"]
     tuned_predictions = (
@@ -449,7 +582,7 @@ def main() -> None:
         clean["test"], targets, tuned_predictions, contract["schema"]["label_names"]
     )
     write_tables(runs, thresholds, examples)
-    print(f"Created 5 figures and generated_tables.tex in {REPORT_DIR}")
+    print(f"Created 5 figures and generated report tables in {REPORT_DIR}")
     # datasets/multiprocess 0.70 emits a harmless ResourceTracker shutdown
     # traceback on this Python 3.12 environment. All artifacts are closed here.
     import sys

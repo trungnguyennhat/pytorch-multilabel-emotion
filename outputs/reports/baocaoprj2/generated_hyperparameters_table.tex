@@ -1,0 +1,19 @@
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.4pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrlrrrrr}
+\toprule
+\textbf{Model} & \textbf{Emb.} & \textbf{Hidden} & \textbf{Layers} & \textbf{Heads} & \textbf{Dropout} & \textbf{Optimizer} & \textbf{LR} & \textbf{Batch} & \textbf{Epochs} & \textbf{Max len.} & \textbf{Warmup} \\
+\midrule
+MLP & 128 & 128 & 1 MLP & -- & 0.2 & AdamW & $10^{-3}$ & 128 & 50 & 32 & -- \\
+BiLSTM & 128 & 128/hướng & 1 BiLSTM & -- & 0.2 & AdamW & $10^{-3}$ & 128 & 50 & 32 & -- \\
+Transformer & 128 & 128 & 2 encoder & 4 & 0.2 & AdamW & $10^{-3}$ & 128 & 50 & 32 & -- \\
+BERT-base-cased & 768 & 768 & 12 encoder & 12 & 0.1 & AdamW & $5\times10^{-5}$ & 16 & 4 & 50 & 10\% \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Hyperparameter của bốn neural models}
+\label{tab:neural-hyperparameters}
+\end{table}

@@ -1,0 +1,7 @@
+Pretrained BERT GoEmotions Reference Baseline
+
+Model: google-bert/bert-base-cased
+Best epoch: 4
+Threshold: 0.5
+Validation macro/micro-F1: 0.4647/0.5749
+Test macro/micro-F1: 0.4703/0.5840

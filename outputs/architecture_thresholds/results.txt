@@ -1,0 +1,21 @@
+Threshold Tuning for All Architectures
+
+Architecture | Strategy | Val Macro F1 | Val Micro F1 | Test Macro F1 | Test Micro F1
+---------------------------------------------------------------------------------------------------------
+tfidf_logreg | fixed | 0.2376 | 0.4135 | 0.2315 | 0.4171
+tfidf_logreg | global | 0.4166 | 0.5014 | 0.4164 | 0.4987
+tfidf_logreg | per_label * | 0.4585 | 0.5415 | 0.4301 | 0.5346
+mean_pooling_mlp | fixed | 0.3638 | 0.4789 | 0.3541 | 0.4788
+mean_pooling_mlp | global | 0.4129 | 0.5001 | 0.3894 | 0.4964
+mean_pooling_mlp | per_label * | 0.4351 | 0.4993 | 0.3983 | 0.4895
+bilstm_attention | fixed | 0.4000 | 0.4952 | 0.3880 | 0.4948
+bilstm_attention | global | 0.4176 | 0.4946 | 0.4097 | 0.4998
+bilstm_attention | per_label * | 0.4398 | 0.5024 | 0.4095 | 0.4953
+transformer_encoder | fixed | 0.4508 | 0.5349 | 0.4366 | 0.5336
+transformer_encoder | global | 0.4654 | 0.5429 | 0.4612 | 0.5469
+transformer_encoder | per_label * | 0.4813 | 0.5456 | 0.4679 | 0.5374
+bert_pretrained | fixed | 0.4647 | 0.5749 | 0.4703 | 0.5840
+bert_pretrained | global | 0.4914 | 0.5791 | 0.4780 | 0.5752
+bert_pretrained | per_label * | 0.5222 | 0.5930 | 0.4976 | 0.5826
+
+* selected by validation macro-F1

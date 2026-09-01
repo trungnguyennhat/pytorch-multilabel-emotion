@@ -21,7 +21,7 @@ GoEmotions contract và data analysis
 
 - **Project state:** Project completed
 - **Current stage:** Stage 6 — Completed
-- **Completed with current evidence:** Stage 0–1 environment/data contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385. Stage 2 TF-IDF đạt clean test macro/micro-F1 0.2315/0.4171. Stage 3 Mean Pooling MLP đạt 0.3541/0.4788. Stage 4 đã hoàn thành: BiLSTM + Attention đạt 0.3880/0.4948; Transformer Encoder đạt 0.4366/0.5336. Stage 5 đã so sánh đủ Standard BCE và capped train-only `pos_weight` với fixed/global/per-label thresholds; Standard BCE + per-label thresholds được chọn bằng validation macro-F1 0.4813 và đạt test 0.4679/0.5374. Stage 6 đã tổng hợp single-seed comparison, parameter/runtime/GPU efficiency, per-label và research-slice/error analysis; báo cáo Project II 16 trang với 5 figures đã build và kiểm tra trực quan toàn bộ.
+- **Completed with current evidence:** Stage 0–1 environment/data contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385. Stage 2–4 đã đánh giá TF-IDF, Mean Pooling MLP, BiLSTM + Attention và Transformer Encoder. BERT-base-cased pretrained theo cấu hình paper gốc đã được thêm làm reference baseline, đạt test macro/micro-F1 0.4703/0.5840 tại threshold 0.5 và 0.4976/0.5826 với per-label thresholds. Fixed/global/per-label thresholds đã được tune trên validation probabilities cho cả năm architectures. Stage 5 cũng đã so sánh Standard BCE với capped train-only `pos_weight` cho Transformer. Stage 6 đã tổng hợp single-seed comparison, parameter/runtime/GPU efficiency, per-label và research-slice/error analysis; báo cáo Project II 16 trang với 5 figures đã build và kiểm tra trực quan toàn bộ.
 - **Current work package:** None — minimum project scope completed
 - **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
 - **Next action:** Optional only — người học review wording, bổ sung yêu cầu riêng của giảng viên hoặc cập nhật thông tin bìa nếu cần
@@ -37,7 +37,7 @@ GoEmotions contract và data analysis
 - [x] Stage 2 — TF-IDF + Logistic Regression baseline
 - [x] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
 - [x] Stage 4 — BiLSTM + Attention and Transformer Encoder
-- [x] Stage 5 — Imbalance and threshold experiments
+- [x] Stage 5 — Imbalance and threshold experiments for all architectures
 - [x] Stage 6 — Final controlled comparison, error analysis and report
 
 <!-- CURRENT_STATUS_END -->
@@ -76,8 +76,9 @@ Kết quả có thể bác bỏ giả thuyết ban đầu. Không thêm model, m
 | `mean_pooling_mlp` | Embedding → masked mean pooling → MLP | Neural baseline đơn giản |
 | `bilstm_attention` | Embedding → BiLSTM → attention pooling | Sequence model |
 | `transformer_encoder` | Embedding + positional encoding → Transformer Encoder → masked pooling | Self-attention model |
+| `bert_pretrained` | Pretrained BERT-base-cased → multi-label classification head | Reference baseline của paper gốc |
 
-Pretrained models và các architecture khác nằm ngoài minimum scope.
+RoBERTa và các pretrained architecture khác nằm ngoài minimum scope; BERT-base-cased được giữ làm external reference, không tính là model train-from-scratch của project.
 
 ## 3. Experimental Contract
 
@@ -218,7 +219,7 @@ Project hoàn thành khi có evidence cho các kết quả sau, không phụ thu
 - Dataset contract và data-analysis decisions đã đóng băng.
 - TF-IDF + Logistic Regression baseline đã được đánh giá.
 - Shared PyTorch data/training/evaluation pipeline chạy đúng.
-- Mean Pooling MLP, BiLSTM + Attention và Transformer Encoder đã được train và so sánh.
+- Mean Pooling MLP, BiLSTM + Attention, Transformer Encoder và pretrained BERT reference đã được train và so sánh.
 - Standard BCE so với `pos_weight`, cùng fixed/global/per-label threshold, đã được kiểm tra có kiểm soát.
 - Final neural comparison dùng seed `42`, có quality metrics và efficiency measurements; báo cáo nêu rõ chưa đánh giá multi-seed stability.
 - Error analysis và final report trả lời các research questions, nêu methodology, results, limitations và conclusion đúng mức evidence.

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.24)  24 AUG 2026 01:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.24)  1 SEP 2026 17:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -22,20 +22,16 @@ File: size12.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
 \abovecaptionskip=\skip49
 \belowcaptionskip=\skip50
 \bibindent=\dimen148
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty
 Package: inputenc 2024/02/08 v1.3d Input encoding file
 \inpenc@prehook=\toks17
 \inpenc@posthook=\toks18
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty
 Package: fontenc 2025/07/18 v2.1d Standard LaTeX package
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5enc.def
 File: t5enc.def 2006/11/21 v1.4 Vietnamese T5 encoding
 Now handling font encoding T5 ...
 ... processing UTF-8 mapping file for font encoding T5
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5enc.dfu
 File: t5enc.dfu 2006/08/19 v1.1 UTF8 support for Vietnamese
    defining Unicode char U+00AB (decimal 171)
@@ -192,11 +188,9 @@ File: t5enc.dfu 2006/08/19 v1.1 UTF8 support for Vietnamese
 ))
 LaTeX Font Info:    Trying to load font information for T5+cmr on input line 11
 6.
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5cmr.fd
 File: t5cmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-))
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/babel\babel.sty
+)) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/babel\babel.sty
 Package: babel 2025/12/11 v25.17 The multilingual framework for LuaLaTeX, pdfLa
 TeX and XeLaTeX
 \babel@savecnt=\count283
@@ -216,14 +210,12 @@ LaTeX Encoding Info:    Ignoring declaration for text command \SS (encoding ?)
 on input line 2101.
 \U@D=\dimen149
 \l@unhyphenated=\language79
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/babel\txtbabel.def)
 \bbl@readstream=\read2
 \bbl@dirlevel=\count284
 Package babel Info: Configuration files are deprecated, as
 (babel)             they can break document portability.
 (babel)             Reported on input line 4196.
-
 *************************************
 * Local config file bblopts.cfg used
 *
@@ -240,7 +232,6 @@ Package babel Info: Importing font and identification data for vietnamese
 mese.ldf
 Language: vietnamese 
 
-
 Package babel Warning: No hyphenation patterns were preloaded for
 (babel)                the language 'Vietnamese' into the format.
 (babel)                Please, configure your TeX system to add them and
@@ -251,8 +242,8 @@ Package babel Info: Hyphen rules for 'vietnamese' set to \l@english
 (babel)             (\language0). Reported on input line 37.
 Package babel Info: Hyphen rules for 'vietnam' set to \l@english
 (babel)             (\language0). Reported on input line 38.
-Loading definitions for the Vietnamese font encoding
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5enc.def
+Loading definitions for the Vietnamese font encoding (C:\Users\ADMIN\AppData\Lo
+cal\Programs\MiKTeX\tex/latex/vntex\t5enc.def
 File: t5enc.def 2006/11/21 v1.4 Vietnamese T5 encoding
 LaTeX Font Info:    Redeclaring font encoding T5 on input line 75.
 LaTeX Encoding Info:    Redeclaring text command \` (encoding T5) on input line
@@ -383,17 +374,14 @@ LaTeX Encoding Info:    Redeclaring text symbol \UHORN (encoding T5) on input l
 ine 432.
 )
 Package babel Info: Making " an active character on input line 147.
-))
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+)) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.st
+y
 Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty
 Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
 \KV@toks@=\toks19
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
 Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty
 Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
 )
@@ -415,13 +403,10 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \float@box=\box53
 \@float@everytoks=\toks21
 \@floatcapt=\box54
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
 Package: geometry 2026/03/07 v6.0 Page Geometry
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty
 Package: iftex 2024/12/12 v1.0g TeX engine tests
 ))
@@ -437,7 +422,6 @@ Package: iftex 2024/12/12 v1.0g TeX engine tests
 \Gm@layouthoffset=\dimen158
 \Gm@layoutvoffset=\dimen159
 \Gm@dimlist=\toks22
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty
 Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
@@ -448,8 +432,7 @@ Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \extratabsurround=\skip51
 \backup@length=\skip52
 \ar@cellbox=\box56
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \heavyrulewidth=\dimen162
 \lightrulewidth=\dimen163
@@ -468,8 +451,7 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \@thisruleclass=\count291
 \@lastruleclass=\count292
 \@thisrulewidth=\dimen174
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty
 Package: enumitem 2025/02/06 v3.11 Customized lists
 \labelindent=\skip53
 \enit@outerparindent=\dimen175
@@ -477,41 +459,30 @@ Package: enumitem 2025/02/06 v3.11 Customized lists
 \enit@inbox=\box57
 \enit@count@id=\count293
 \enitdp@description=\count294
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/makecell\makecell.sty
-Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
-\rotheadsize=\dimen176
-\c@nlinenum=\count295
-\TeXr@lab=\toks25
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
 Package: amsmath 2025/07/09 v2.17z AMS math features
 \@mathmargin=\skip54
-
 For additional information on amsmath, use the `?' option.
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
 Package: amstext 2024/11/17 v2.01 AMS text
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
-\@emptytoks=\toks26
-\ex@=\dimen177
-))
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
+\@emptytoks=\toks25
+\ex@=\dimen176
+)) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
-\pmbraise@=\dimen178
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
+\pmbraise@=\dimen177
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
-\inf@bad=\count296
+\inf@bad=\count295
 LaTeX Info: Redefining \frac on input line 233.
-\uproot@=\count297
-\leftroot@=\count298
+\uproot@=\count296
+\leftroot@=\count297
 LaTeX Info: Redefining \overline on input line 398.
 LaTeX Info: Redefining \colon on input line 409.
-\classnum@=\count299
-\DOTSCASE@=\count300
+\classnum@=\count298
+\DOTSCASE@=\count299
 LaTeX Info: Redefining \ldots on input line 495.
 LaTeX Info: Redefining \dots on input line 498.
 LaTeX Info: Redefining \cdots on input line 619.
@@ -521,40 +492,38 @@ LaTeX Info: Redefining \big on input line 721.
 LaTeX Info: Redefining \Big on input line 722.
 LaTeX Info: Redefining \bigg on input line 723.
 LaTeX Info: Redefining \Bigg on input line 724.
-\big@size=\dimen179
+\big@size=\dimen178
 LaTeX Font Info:    Redeclaring font encoding OML on input line 742.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 743.
-\macc@depth=\count301
+\macc@depth=\count300
 LaTeX Info: Redefining \bmod on input line 904.
 LaTeX Info: Redefining \pmod on input line 909.
 LaTeX Info: Redefining \smash on input line 939.
 LaTeX Info: Redefining \relbar on input line 969.
 LaTeX Info: Redefining \Relbar on input line 970.
-\c@MaxMatrixCols=\count302
+\c@MaxMatrixCols=\count301
 \dotsspace@=\muskip17
-\c@parentequation=\count303
-\dspbrk@lvl=\count304
-\tag@help=\toks27
-\row@=\count305
-\column@=\count306
-\maxfields@=\count307
-\andhelp@=\toks28
-\eqnshift@=\dimen180
-\alignsep@=\dimen181
-\tagshift@=\dimen182
-\tagwidth@=\dimen183
-\totwidth@=\dimen184
-\lineht@=\dimen185
-\@envbody=\toks29
+\c@parentequation=\count302
+\dspbrk@lvl=\count303
+\tag@help=\toks26
+\row@=\count304
+\column@=\count305
+\maxfields@=\count306
+\andhelp@=\toks27
+\eqnshift@=\dimen179
+\alignsep@=\dimen180
+\tagshift@=\dimen181
+\tagwidth@=\dimen182
+\totwidth@=\dimen183
+\lineht@=\dimen184
+\@envbody=\toks28
 \multlinegap=\skip55
 \multlinetaggap=\skip56
-\mathdisplay@stack=\toks30
+\mathdisplay@stack=\toks29
 LaTeX Info: Redefining \[ on input line 2950.
 LaTeX Info: Redefining \] on input line 2951.
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty
 Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 \symAMSa=\mathgroup4
@@ -576,7 +545,6 @@ Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.s
 ty
 Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
 Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
 )
@@ -592,13 +560,10 @@ Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
 Package pdftexcmds Info: \pdfdraftmode found.
-))
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty
+)) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty
 Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
 Package: nameref 2025-06-21 v2.57 Cross-referencing by name of section
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty
 Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 )
@@ -609,29 +574,28 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
-\c@section@level=\count308
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
+\c@section@level=\count307
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty
 Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count309
+\etb@tempcnta=\count308
 )
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
 ty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
 )
 )
-\@linkdim=\dimen186
-\Hy@linkcounter=\count310
-\Hy@pagecounter=\count311
- (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
+\@linkdim=\dimen185
+\Hy@linkcounter=\count309
+\Hy@pagecounter=\count310
+(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
 File: pd1enc.def 2025-07-12 v7.01o Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
 ... no UTF-8 mapping file for font encoding PD1
 ) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count312
- (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
+\Hy@SavedSpaceFactor=\count311
+(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
 File: puenc.def 2025-07-12 v7.01o Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
 ... no UTF-8 mapping file for font encoding PU
@@ -643,15 +607,13 @@ Package hyperref Info: Plain pages OFF on input line 4210.
 Package hyperref Info: Backreferencing OFF on input line 4215.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4462.
-\c@Hy@tempcnt=\count313
-
+\c@Hy@tempcnt=\count312
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4801.
-\XeTeXLinkMargin=\dimen187
-
+\XeTeXLinkMargin=\dimen186
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 
@@ -660,9 +622,9 @@ Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
 )
 ))
-\Fld@menulength=\count314
-\Field@Width=\dimen188
-\Fld@charsize=\dimen189
+\Fld@menulength=\count313
+\Field@Width=\dimen187
+\Fld@charsize=\dimen188
 Package hyperref Info: Hyper figures OFF on input line 6078.
 Package hyperref Info: Link nesting OFF on input line 6083.
 Package hyperref Info: Hyper index ON on input line 6086.
@@ -670,16 +632,15 @@ Package hyperref Info: backreferencing OFF on input line 6093.
 Package hyperref Info: Link coloring OFF on input line 6098.
 Package hyperref Info: Link coloring with OCG OFF on input line 6103.
 Package hyperref Info: PDF/A mode OFF on input line 6108.
-\Hy@abspage=\count315
-\c@Item=\count316
-\c@Hfootnote=\count317
+\Hy@abspage=\count314
+\c@Item=\count315
+\c@Hfootnote=\count316
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
 File: hpdftex.def 2025-07-12 v7.01o Hyperref driver for pdfTeX
-\Fld@listcount=\count318
-\c@bookmark@seq@number=\count319
+\Fld@listcount=\count317
+\c@bookmark@seq@number=\count318
 
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
 echeck.sty
@@ -693,8 +654,7 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 84.
 )
 \Hy@SectionHShift=\skip57
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/tocloft\tocloft.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/tocloft\tocloft.sty
 Package: tocloft 2017/08/31 v2.3i parameterised ToC, etc., typesetting
 Package tocloft Info: The document has section divisions on input line 51.
 \cftparskip=\skip58
@@ -723,73 +683,72 @@ Package tocloft Info: The document has section divisions on input line 51.
 \cftbeforefigskip=\skip81
 \cftfigindent=\skip82
 \cftfignumwidth=\skip83
-\c@lofdepth=\count320
-\c@lotdepth=\count321
+\c@lofdepth=\count319
+\c@lotdepth=\count320
 \cftbeforelottitleskip=\skip84
 \cftafterlottitleskip=\skip85
 \cftbeforetabskip=\skip86
 \cfttabindent=\skip87
 \cfttabnumwidth=\skip88
-)
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/titlesec\titlesec.sty
+) (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/titlesec\titlesec.sty
 Package: titlesec 2025/01/04 v2.17 Sectioning titles
 \ttl@box=\box60
 \beforetitleunit=\skip89
 \aftertitleunit=\skip90
-\ttl@plus=\dimen190
-\ttl@minus=\dimen191
-\ttl@toksa=\toks31
-\titlewidth=\dimen192
-\titlewidthlast=\dimen193
-\titlewidthfirst=\dimen194
+\ttl@plus=\dimen189
+\ttl@minus=\dimen190
+\ttl@toksa=\toks30
+\titlewidth=\dimen191
+\titlewidthlast=\dimen192
+\titlewidthfirst=\dimen193
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 21.
+Package hyperref Info: Option `colorlinks' set `true' on input line 8.
 
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
 tex.def
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count322
+\l__color_backend_stack_int=\count321
 ) (main.aux
 Package babel Info: 'vietnamese' activates 'vietnamese' shorthands.
 (babel)             Reported on input line 8.
 )
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for T5/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for T5/cmr/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 18.
+LaTeX Font Info:    ... okay on input line 18.
 
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
 ii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count323
-\scratchdimen=\dimen195
+\scratchcounter=\count322
+\scratchdimen=\dimen194
 \scratchbox=\box61
-\nofMPsegments=\count324
-\nofMParguments=\count325
-\everyMPshowfont=\toks32
-\MPscratchCnt=\count326
-\MPscratchDim=\dimen196
-\MPnumerator=\count327
-\makeMPintoPDFobject=\count328
-\everyMPtoPDFconversion=\toks33
+\nofMPsegments=\count323
+\nofMParguments=\count324
+\everyMPshowfont=\toks31
+\MPscratchCnt=\count325
+\MPscratchDim=\dimen195
+\MPnumerator=\count326
+\makeMPintoPDFobject=\count327
+\everyMPtoPDFconversion=\toks32
 )
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
 ase.sty
@@ -837,39 +796,40 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics\color.sty
 Package: color 2025/01/14 v1.3e Standard LaTeX Color (DPC)
-
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package color Info: Driver file: pdftex.def on input line 149.
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx)
 )
-Package hyperref Info: Link coloring ON on input line 31.
- (main.out) (main.out)
+Package hyperref Info: Link coloring ON on input line 18.
+(main.out) (main.out)
 \@outlinefile=\write3
 \openout3 = `main.out'.
 
-<hinh/hinh0.png, id=103, 144.54pt x 216.81pt>
+<hinh/hinh0.png, id=119, 144.54pt x 216.81pt>
 File: hinh/hinh0.png Graphic file (type png)
 <use hinh/hinh0.png>
-Package pdftex.def Info: hinh/hinh0.png  used on input line 38.
+Package pdftex.def Info: hinh/hinh0.png  used on input line 23.
 (pdftex.def)             Requested size: 91.04872pt x 136.57117pt.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 50.
-
+LaTeX Font Info:    Trying to load font information for U+msa on input line 26.
 
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 50.
-
+LaTeX Font Info:    Trying to load font information for U+msb on input line 26.
 
 (C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-[1
+) [1
 
 {C:/Users/ADMIN/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map} <./hinh/hinh0
-.png>] (main.toc)
+.png>] (main.toc
+LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 2
+5.
+(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5cmtt.fd
+File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+))
 \tf@toc=\write4
 \openout4 = `main.toc'.
 
@@ -878,95 +838,76 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.63 \clearpage
-                [1]
-LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 8
-2.
-
-(C:\Users\ADMIN\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5cmtt.fd
-File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-[2
+l.38 \clearpage
+                [1] [2
 
 
-]
-Underfull \hbox (badness 1371) in paragraph at lines 111--112
-\T5/cmr/m/n/12 B i b¡o gèc giîi thi»u GoE-mo-tions vîi kho£ng 58 ngh¼n b¼nh luª
-n Red-dit ^^_÷ñc
- []
-
-
-Underfull \hbox (badness 5147) in paragraph at lines 111--112
-\T5/cmr/m/n/12 g¡n nh¢n thõ cæng [[]]. Project sû döng con-fig-u-ra-tion \T5/cm
-tt/m/n/12 simplified \T5/cmr/m/n/12 tø nguçn
- []
-
-<hinh/label_distribution.png, id=154, 598.8555pt x 585.7155pt>
+] (generated_clean_split_table.tex)
+<hinh/label_distribution.png, id=176, 598.8555pt x 585.7155pt>
 File: hinh/label_distribution.png Graphic file (type png)
 <use hinh/label_distribution.png>
-Package pdftex.def Info: hinh/label_distribution.png  used on input line 136.
+Package pdftex.def Info: hinh/label_distribution.png  used on input line 79.
 (pdftex.def)             Requested size: 403.7449pt x 394.8851pt.
 [3
 
-] [4 <./hinh/label_distribution.png>]
-Underfull \hbox (badness 3849) in paragraph at lines 155--157
-\T5/cmr/m/n/12 Targets câ shape $\OT1/cmr/m/n/12 [\OML/cmm/m/it/12 B; \OT1/cmr/
-m/n/12 28]$\T5/cmr/m/n/12 , dtype \T5/cmtt/m/n/12 float32 \T5/cmr/m/n/12 v  n¬m
- tr¶n còng de-vice vîi log-its.
+] [4 <./hinh/label_distribution.png>] [5] [6
+
+] [7] (generated_hyperparameters_table.tex) [8] [9
+
+] (generated_tables.tex)
+<hinh/model_comparison.png, id=241, 730.2555pt x 397.485pt>
+File: hinh/model_comparison.png Graphic file (type png)
+<use hinh/model_comparison.png>
+Package pdftex.def Info: hinh/model_comparison.png  used on input line 210.
+(pdftex.def)             Requested size: 460.07907pt x 250.42293pt.
+[10
+
+]
+<hinh/threshold_study.png, id=252, 745.038pt x 411.282pt>
+File: hinh/threshold_study.png Graphic file (type png)
+<use hinh/threshold_study.png>
+Package pdftex.def Info: hinh/threshold_study.png  used on input line 225.
+(pdftex.def)             Requested size: 460.07907pt x 253.97554pt.
+[11 <./hinh/model_comparison.png>]
+LaTeX Font Info:    Font shape `T5/cmtt/bx/n' in size <14.4> not available
+(Font)              Font shape `T5/cmtt/m/n' tried instead on input line 234.
+
+Underfull \hbox (badness 2726) in paragraph at lines 236--237
+\T5/cmr/m/n/12 Project công thû xû lþ m§t c¥n b¬ng b¬ng c¡ch hu§n luy»n Trans-f
+ormer vîi
  []
 
-[5
-
-] [6] [7
-
-] (generated_tables.tex
-Underfull \hbox (badness 2213) in paragraph at lines 63--64
+(generated_pos_weight_table.tex) [12 <./hinh/threshold_study.png>]
+<hinh/per_label_f1.png, id=268, 659.2995pt x 679.338pt>
+File: hinh/per_label_f1.png Graphic file (type png)
+<use hinh/per_label_f1.png>
+Package pdftex.def Info: hinh/per_label_f1.png  used on input line 248.
+(pdftex.def)             Requested size: 403.7449pt x 416.02301pt.
+<hinh/slice_performance.png, id=270, 814.3515pt x 350.181pt>
+File: hinh/slice_performance.png Graphic file (type png)
+<use hinh/slice_performance.png>
+Package pdftex.def Info: hinh/slice_performance.png  used on input line 261.
+(pdftex.def)             Requested size: 464.77835pt x 199.86171pt.
+[13 <./hinh/per_label_f1.png>] (generated_error_table.tex
+Underfull \hbox (badness 2213) in paragraph at lines 9--10
 []|\T5/cmr/m/n/10 Bä sât nh¢n
  []
 
 
-Underfull \hbox (badness 1931) in paragraph at lines 64--64
+Underfull \hbox (badness 1931) in paragraph at lines 10--10
 []|\T5/cmr/m/n/10 caring, love, op-ti-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 65--66
+Underfull \hbox (badness 10000) in paragraph at lines 11--12
 []|\T5/cmr/m/n/10 Mì hç/nh¢n
  []
 
-)
-<hinh/model_comparison.png, id=200, 730.2555pt x 397.485pt>
-File: hinh/model_comparison.png Graphic file (type png)
-<use hinh/model_comparison.png>
-Package pdftex.def Info: hinh/model_comparison.png  used on input line 216.
-(pdftex.def)             Requested size: 460.07907pt x 250.42293pt.
- [8
+) [14 <./hinh/slice_performance.png>] [15
 
-]
-<hinh/threshold_study.png, id=214, 745.038pt x 411.6105pt>
-File: hinh/threshold_study.png Graphic file (type png)
-<use hinh/threshold_study.png>
-Package pdftex.def Info: hinh/threshold_study.png  used on input line 229.
-(pdftex.def)             Requested size: 460.07907pt x 254.1784pt.
- [9 <./hinh/model_comparison.png>]
-<hinh/per_label_f1.png, id=222, 659.2995pt x 679.338pt>
-File: hinh/per_label_f1.png Graphic file (type png)
-<use hinh/per_label_f1.png>
-Package pdftex.def Info: hinh/per_label_f1.png  used on input line 242.
-(pdftex.def)             Requested size: 403.7449pt x 416.02301pt.
- [10 <./hinh/threshold_study.png>]
-<hinh/slice_performance.png, id=230, 814.3515pt x 350.181pt>
-File: hinh/slice_performance.png Graphic file (type png)
-<use hinh/slice_performance.png>
-Package pdftex.def Info: hinh/slice_performance.png  used on input line 253.
-(pdftex.def)             Requested size: 464.77835pt x 199.86171pt.
+] [16
 
-[11 <./hinh/per_label_f1.png>] [12 <./hinh/slice_performance.png>] [13
-
-]
-[14
-
-] [15
+] [17
 
 ] (main.aux)
  ***********
@@ -974,36 +915,43 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 96BF56FCBFB328E6C7AE17392CBE78F0;4403.
+(rerunfilecheck)             Checksum: 6908988E85307D72B7C9A3C91BAB74E6;5528.
  ) 
 Here is how much of TeX's memory you used:
- 13465 strings out of 467871
- 208818 string characters out of 5418376
- 646779 words of memory out of 5000000
- 42088 multiletter control sequences out of 15000+600000
- 653324 words of font info for 93 fonts, out of 8000000 for 9000
+ 13353 strings out of 467871
+ 208442 string characters out of 5418376
+ 638002 words of memory out of 5000000
+ 41954 multiletter control sequences out of 15000+600000
+ 654927 words of font info for 96 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,11n,79p,660b,493s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,79p,1063b,493s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\ADMIN\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm
 1200.pk><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
 ts/cm/cmex10.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/publ
 ic/amsfonts/cm/cmmi12.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/t
 ype1/public/amsfonts/cm/cmmi8.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX
-/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/ADMIN/AppData/Local/Program
-s/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/ADMIN/AppData/Local/
-Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/ADMIN/AppDa
-ta/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/ADM
-IN/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb
-><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx10.pfb
-><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb
-><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr10.pfb>
-<C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><
-C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr17.pfb><C
-:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C
-:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
-Output written on main.pdf (16 pages, 975317 bytes).
+/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/ADMIN/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/ADMIN/AppData/Local
+/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/ADMIN/AppDat
+a/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/ADMIN
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Us
+ers/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pf
+b><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
+cmsy8.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsf
+onts/symbols/msbm10.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/typ
+e1/vntex/vnr/vnbx10.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/typ
+e1/vntex/vnr/vnbx12.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/typ
+e1/vntex/vnr/vnbx8.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type
+1/vntex/vnr/vnr10.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1
+/vntex/vnr/vnr12.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/
+vntex/vnr/vnr17.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/v
+ntex/vnr/vnr8.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vnt
+ex/vnr/vnti12.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vnt
+ex/vnr/vntt10.pfb><C:/Users/ADMIN/AppData/Local/Programs/MiKTeX/fonts/type1/vnt
+ex/vnr/vntt12.pfb>
+Output written on main.pdf (18 pages, 1038806 bytes).
 PDF statistics:
- 343 PDF objects out of 1000 (max. 8388607)
- 61 named destinations out of 1000 (max. 500000)
- 231 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 408 PDF objects out of 1000 (max. 8388607)
+ 73 named destinations out of 1000 (max. 500000)
+ 263 words of extra memory for PDF output out of 10000 (max. 10000000)
 

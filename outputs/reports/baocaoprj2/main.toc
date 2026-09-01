@@ -1,26 +1,30 @@
 \babel@toc {vietnamese}{}\relax 
 \contentsline {section}{\numberline {1}Giới thiệu}{2}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Lý do chọn đề tài}{2}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}Mục tiêu và câu hỏi nghiên cứu}{2}{subsection.1.2}%
-\contentsline {section}{\numberline {2}Dữ liệu và phân tích khám phá}{3}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Bộ dữ liệu GoEmotions}{3}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Phân bố nhãn}{3}{subsection.2.2}%
-\contentsline {section}{\numberline {3}Phương pháp nghiên cứu}{5}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Quy trình thực nghiệm}{5}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}TF-IDF và Logistic Regression}{5}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Mean Pooling MLP}{5}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}BiLSTM kết hợp attention}{5}{subsection.3.4}%
-\contentsline {subsection}{\numberline {3.5}Transformer Encoder}{5}{subsection.3.5}%
-\contentsline {subsection}{\numberline {3.6}Loss weighting và threshold}{6}{subsection.3.6}%
-\contentsline {section}{\numberline {4}Thiết kế đánh giá}{7}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Các chỉ số}{7}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Efficiency và error slices}{7}{subsection.4.2}%
-\contentsline {section}{\numberline {5}Kết quả và thảo luận}{8}{section.5}%
-\contentsline {subsection}{\numberline {5.1}So sánh các kiến trúc}{8}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Ảnh hưởng của imbalance và threshold}{9}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Phân tích per-label}{10}{subsection.5.3}%
-\contentsline {subsection}{\numberline {5.4}Phân tích theo đặc điểm sample}{11}{subsection.5.4}%
-\contentsline {subsection}{\numberline {5.5}Efficiency}{12}{subsection.5.5}%
-\contentsline {subsection}{\numberline {5.6}Các failure modes chính}{12}{subsection.5.6}%
-\contentsline {section}{\numberline {6}Hạn chế của nghiên cứu}{13}{section.6}%
-\contentsline {section}{\numberline {7}Kết luận}{14}{section.7}%
+\contentsline {subsection}{\numberline {1.1}Bài toán và động lực}{2}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Mục tiêu của báo cáo}{2}{subsection.1.2}%
+\contentsline {section}{\numberline {2}Dữ liệu và quy trình xử lý}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Nguồn dữ liệu và cấu trúc nhãn}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Kiểm tra và tạo clean splits}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Tokenize và build vocabulary cho mô hình train-from-scratch}{4}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Biểu diễn TF-IDF}{5}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}WordPiece cho BERT pretrained}{5}{subsection.2.5}%
+\contentsline {section}{\numberline {3}Các hệ thống phân loại}{6}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Luồng dự đoán chung}{6}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}TF-IDF và Logistic Regression}{6}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Mean Pooling MLP}{6}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}BiLSTM kết hợp attention}{6}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Transformer Encoder huấn luyện từ đầu}{7}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}BERT-base-cased pretrained}{7}{subsection.3.6}%
+\contentsline {section}{\numberline {4}Huấn luyện và đánh giá}{9}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Vai trò của ba split}{9}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Các chỉ số}{9}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Threshold và cách tuning}{9}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Kết quả và diễn giải}{10}{section.5}%
+\contentsline {subsection}{\numberline {5.1}So sánh tại threshold 0.5}{10}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Kết quả sau threshold tuning}{11}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Ảnh hưởng của \texttt {pos\_weight}}{12}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Phân tích theo từng nhãn}{13}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Phân tích theo đặc điểm mẫu}{13}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}Các failure modes chính}{14}{subsection.5.6}%
+\contentsline {section}{\numberline {6}Hạn chế}{15}{section.6}%
+\contentsline {section}{\numberline {7}Kết luận}{16}{section.7}%

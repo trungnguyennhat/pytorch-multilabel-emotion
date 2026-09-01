@@ -24,3 +24,8 @@ Thumbs.db
 # Data cache (Hugging Face datasets sẽ cache ở ~/.cache)
 data/raw/
 data/processed/*.pkl
+outputs/bert_pretrained
+
+# Generated PDF QA artifacts
+tmp/pdfs/
+texput.log

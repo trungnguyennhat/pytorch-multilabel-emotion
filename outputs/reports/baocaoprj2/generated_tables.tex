@@ -10,61 +10,28 @@ TF-IDF + LR & 0.6293 & 0.1688 & 0.2315 & 0.7134 & 0.2947 & 0.4171 \\
 Mean Pooling MLP & 0.4780 & 0.2995 & 0.3541 & 0.5671 & 0.4142 & 0.4788 \\
 BiLSTM + Attention & 0.4927 & 0.3337 & 0.3880 & 0.5777 & 0.4327 & 0.4948 \\
 Transformer Encoder & 0.5301 & 0.3933 & 0.4366 & 0.6031 & 0.4785 & 0.5336 \\
+BERT pretrained & 0.5400 & 0.4295 & 0.4703 & 0.6441 & 0.5342 & 0.5840 \\
 \bottomrule
 \end{tabular}
-\caption{Kết quả test của bốn kiến trúc tại threshold 0.5}
+\caption{Kết quả test của năm hệ thống tại threshold 0.5}
 \label{tab:model-results}
 \end{table}
 
 \begin{table}[H]
 \centering
 \small
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{lrrrrrr}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrl}
 \toprule
-\textbf{Chiến lược} & \textbf{Macro P} & \textbf{Macro R} & \textbf{Macro F1} & \textbf{Micro P} & \textbf{Micro R} & \textbf{Micro F1} \\
+\textbf{Hệ thống} & \textbf{Fixed F1} & \textbf{Tuned F1} & \textbf{$\Delta$ F1} & \textbf{Micro F1} & \textbf{Chọn} \\
 \midrule
-standard\_fixed & 0.5301 & 0.3933 & 0.4366 & 0.6031 & 0.4785 & 0.5336 \\
-standard\_global & 0.4539 & 0.4919 & 0.4612 & 0.5014 & 0.6015 & 0.5469 \\
-\textbf{standard\_per\_label} & 0.5128 & 0.4725 & 0.4679 & 0.4867 & 0.5998 & 0.5374 \\
-weighted\_fixed & 0.2850 & 0.6287 & 0.3779 & 0.3098 & 0.6848 & 0.4266 \\
-weighted\_global & 0.4202 & 0.4573 & 0.4224 & 0.4654 & 0.4158 & 0.4392 \\
-weighted\_per\_label & 0.3880 & 0.5207 & 0.4360 & 0.4316 & 0.6254 & 0.5108 \\
+TF-IDF + LR & 0.2315 & 0.4301 & +0.1986 & 0.5346 & per-label \\
+Mean Pooling MLP & 0.3541 & 0.3983 & +0.0442 & 0.4895 & per-label \\
+BiLSTM + Attention & 0.3880 & 0.4095 & +0.0215 & 0.4953 & per-label \\
+Transformer Encoder & 0.4366 & 0.4679 & +0.0313 & 0.5374 & per-label \\
+BERT pretrained & 0.4703 & 0.4976 & +0.0273 & 0.5826 & per-label \\
 \bottomrule
 \end{tabular}
-\caption{Kết quả test của sáu chiến lược loss và threshold}
+\caption{Fixed 0.5 và threshold được chọn bằng validation macro-F1}
 \label{tab:threshold-results}
-\end{table}
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Mô hình} & \textbf{Tham số} & \textbf{Best epoch} & \textbf{Train (s)} & \textbf{Peak GPU (MB)} \\
-\midrule
-Mean Pooling MLP & 1,766,300 & 37 & 249.4 & 102.1 \\
-BiLSTM + Attention & 2,050,588 & 21 & 301.6 & 143.3 \\
-Transformer Encoder & 2,019,100 & 27 & 244.3 & 156.4 \\
-\bottomrule
-\end{tabular}
-\caption{Chi phí huấn luyện của ba kiến trúc neural trên cùng thiết bị}
-\label{tab:efficiency}
-\end{table}
-
-\begin{table}[H]
-\centering
-\footnotesize
-\begin{tabular}{p{5.2cm}p{3.0cm}p{3.0cm}p{2.2cm}}
-\toprule
-\textbf{Văn bản} & \textbf{Nhãn thật} & \textbf{Dự đoán} & \textbf{Nhóm lỗi} \\
-\midrule
-Not sure why [NAME] didn't foul to stop the fast break there & neutral & confusion, neutral & Negation \\
-I was teased for being a virgin when I was a 6th grader- in 2005 & embarrassment & realization & Bỏ sót nhãn hiếm \\
-Hi, [NAME]! I thought I would stop by and wish you a wonderful and prosperous year! Have a good one! -HappyFriendlyBot & caring, love, optimism & caring & Nhiều nhãn \\
-I’m really sorry about your situation :( Although I love the names Sapphira, Cirilla, and Scarlett! & sadness & love, remorse & Mơ hồ/nhãn gần nghĩa \\
-\bottomrule
-\end{tabular}
-\caption{Một số lỗi của Transformer với per-label thresholds}
-\label{tab:error-examples}
 \end{table}
