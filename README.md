@@ -1,205 +1,76 @@
-# Comparative Study of PyTorch Neural Architectures for Multi-label Emotion Classification
+# Multi-label Emotion Classification on GoEmotions
 
-Project nghiên cứu bài toán **multi-label emotion classification** trên GoEmotions. Trọng tâm là so sánh có kiểm soát một classical baseline với ba neural architecture train từ đầu bằng PyTorch, sau đó phân tích chất lượng, chi phí và failure modes.
+An end-to-end comparison of classical, train-from-scratch neural, and pretrained approaches for 28-label emotion classification. The project covers data auditing, leakage-safe preprocessing, custom PyTorch training loops, threshold optimization, imbalance handling, and error analysis.
 
-Nguyên tắc xuyên suốt là **research-first, minimum implementation**: chỉ viết code cần để bảo vệ tính hợp lệ của experiment hoặc trả lời trực tiếp một research question. Không biến mỗi phép kiểm tra, metric hoặc artifact thành một helper/file riêng.
+[Read the full Project II report (PDF)](outputs/reports/baocaoprj2/main.pdf)
 
-```text
-GoEmotions contract và data analysis
-→ TF-IDF baseline
-→ shared PyTorch data/training/evaluation pipeline
-→ MLP, BiLSTM, Transformer experiments
-→ imbalance và threshold experiments
-→ controlled comparison, error analysis và final report
-```
+## Key results
 
-## Current Status
+All thresholds are selected using validation macro-F1 and then frozen for test evaluation.
 
-> Agent chỉ được chỉnh sửa nội dung nằm giữa hai marker dưới đây nếu người dùng không yêu cầu sửa file khác.
+| System | Test macro-F1 @ 0.5 | Tuned macro-F1 | Tuned micro-F1 |
+|---|---:|---:|---:|
+| TF-IDF + Logistic Regression | 0.2315 | 0.4301 | 0.5346 |
+| Mean Pooling MLP | 0.3541 | 0.3983 | 0.4895 |
+| BiLSTM + Attention | 0.3880 | 0.4095 | 0.4953 |
+| Transformer Encoder | 0.4366 | 0.4679 | 0.5374 |
+| BERT-base-cased (pretrained reference) | **0.4703** | **0.4976** | **0.5826** |
 
-<!-- CURRENT_STATUS_START -->
+Main findings:
 
-- **Project state:** Project completed
-- **Current stage:** Stage 6 — Completed
-- **Completed with current evidence:** Stage 0–1 environment/data contract đã pass với 28 ordered labels và clean views 43,410 / 5,383 / 5,385. Stage 2–4 đã đánh giá TF-IDF, Mean Pooling MLP, BiLSTM + Attention và Transformer Encoder. BERT-base-cased pretrained theo cấu hình paper gốc đã được thêm làm reference baseline, đạt test macro/micro-F1 0.4703/0.5840 tại threshold 0.5 và 0.4976/0.5826 với per-label thresholds. Fixed/global/per-label thresholds đã được tune trên validation probabilities cho cả năm architectures. Stage 5 cũng đã so sánh Standard BCE với capped train-only `pos_weight` cho Transformer. Stage 6 đã tổng hợp single-seed comparison, parameter/runtime/GPU efficiency, per-label và research-slice/error analysis; báo cáo Project II 16 trang với 5 figures đã build và kiểm tra trực quan toàn bộ.
-- **Current work package:** None — minimum project scope completed
-- **Reusable work from previous project:** Người học đã có kinh nghiệm thiết kế evaluation set, chạy experiment theo schema thống nhất, so sánh model và viết technical report; không tái sử dụng source code trực tiếp
-- **Next action:** Optional only — người học review wording, bổ sung yêu cầu riêng của giảng viên hoặc cập nhật thông tin bìa nếu cần
-- **Evidence required to complete current package:** Satisfied
-- **Current evidence gap:** None trong scope đã duyệt; multi-seed stability được ghi rõ là limitation đã chủ động loại khỏi scope
-- **Blockers:** None
-- **Last updated:** 2026-08-24
+- Threshold choice materially changes system ranking. TF-IDF rises from 0.2315 to 0.4301 macro-F1 and outperforms the MLP and BiLSTM after tuning.
+- The train-from-scratch Transformer is the strongest custom neural model, reaching 0.4679 macro-F1.
+- BERT remains the best tuned system at 0.4976 macro-F1, but it is an external pretrained reference rather than a data-equivalent comparison.
+- `pos_weight` increases Transformer recall but introduces too many false positives: tuned macro-F1 is 0.4360 versus 0.4679 with standard BCE.
 
-### Stage progress
+## Experimental design
 
-- [x] Stage 0 — Environment and repository setup
-- [x] Stage 1 — Data contract and analysis
-- [x] Stage 2 — TF-IDF + Logistic Regression baseline
-- [x] Stage 3 — Shared PyTorch pipeline + Mean Pooling MLP
-- [x] Stage 4 — BiLSTM + Attention and Transformer Encoder
-- [x] Stage 5 — Imbalance and threshold experiments for all architectures
-- [x] Stage 6 — Final controlled comparison, error analysis and report
+### Data
 
-<!-- CURRENT_STATUS_END -->
+The project uses the `simplified` configuration of [GoEmotions](https://github.com/google-research/google-research/tree/master/goemotions), containing 27 emotion labels plus `neutral`.
 
-## 1. Research Goals
+| Split | Official | Removed cross-split duplicates | Clean |
+|---|---:|---:|---:|
+| Train | 43,410 | 0 | 43,410 |
+| Validation | 5,426 | 43 | 5,383 |
+| Test | 5,427 | 42 | 5,385 |
 
-Project phải trả lời các câu hỏi sau:
+Exact-text duplicates are removed only across evaluation splits. Vocabulary, IDF, `pos_weight`, model selection, and threshold tuning never use test data.
 
-1. Neural models có cải thiện so với TF-IDF + Logistic Regression không?
-2. Mean Pooling MLP, BiLSTM + Attention và Transformer Encoder khác nhau thế nào về macro-F1 và micro-F1?
-3. Sequence models có lợi thế trên câu dài, negation hoặc sample có nhiều emotion labels không?
-4. `pos_weight` ảnh hưởng thế nào đến precision, recall và F1 của label hiếm?
-5. Global hoặc per-label threshold có tốt hơn threshold `0.5` không?
-6. Model phức tạp hơn có đáng đổi lấy parameter count, training time và GPU memory lớn hơn không?
-7. Những failure mode chính có liên quan đến sarcasm, negation, ambiguity hoặc label correlation không?
+### Systems
 
-Kết quả có thể bác bỏ giả thuyết ban đầu. Không thêm model, metric hoặc ablation nếu chúng không giúp trả lời một trong các câu hỏi trên.
+- **TF-IDF + Logistic Regression:** unigram sparse features with 28 one-vs-rest classifiers.
+- **Mean Pooling MLP:** learned token embeddings, masked mean pooling, and an MLP head.
+- **BiLSTM + Attention:** bidirectional sequence encoding with learned attention pooling.
+- **Transformer Encoder:** two train-from-scratch encoder layers with four attention heads.
+- **BERT-base-cased:** pretrained WordPiece encoder fine-tuned as the reference baseline from the original GoEmotions work.
 
-## 2. Task and Systems
+Neural models use `BCEWithLogitsLoss`. Evaluation reports macro/micro precision, recall, and F1. Threshold experiments compare fixed 0.5, one validation-tuned global threshold, and 28 validation-tuned per-label thresholds.
 
-### Problem contract
-
-- Input: một câu tiếng Anh.
-- Output: một tập emotion labels; một sample có thể có nhiều positive labels.
-- Đây là bài toán **multi-label**, không phải multi-class.
-- Target có dtype `float32` và shape `[num_labels]`.
-- Model trả logits `[batch_size, num_labels]`.
-- `sigmoid(logits)` tạo probabilities; threshold tạo binary predictions.
-- Loss neural mặc định là `torch.nn.BCEWithLogitsLoss()`; không đặt sigmoid trong `forward()`.
-
-### Systems bắt buộc
-
-| System | Pipeline | Vai trò nghiên cứu |
-|---|---|---|
-| `tfidf_logreg` | TF-IDF → One-vs-Rest Logistic Regression | Classical baseline |
-| `mean_pooling_mlp` | Embedding → masked mean pooling → MLP | Neural baseline đơn giản |
-| `bilstm_attention` | Embedding → BiLSTM → attention pooling | Sequence model |
-| `transformer_encoder` | Embedding + positional encoding → Transformer Encoder → masked pooling | Self-attention model |
-| `bert_pretrained` | Pretrained BERT-base-cased → multi-label classification head | Reference baseline của paper gốc |
-
-RoBERTa và các pretrained architecture khác nằm ngoài minimum scope; BERT-base-cased được giữ làm external reference, không tính là model train-from-scratch của project.
-
-## 3. Experimental Contract
-
-### Data contract
-
-- Dùng GoEmotions official simplified configuration và official train/validation/test splits.
-- Audit schema từ loader thực tế; không hard-code row count hoặc label count từ tutorial làm điều kiện pass.
-- Ghi dataset fingerprint, split sizes, columns và ordered label names vào một artifact duy nhất: `data/artifacts/dataset_contract.json`.
-- `label_names[index]` là mapping chuẩn từ ID sang tên; mọi target, logit, prediction, threshold và metric dùng cùng thứ tự này. Không lưu hai mapping JSON ngược nhau.
-- Không sửa, loại hoặc di chuyển sample trong Stage 1. Nếu cần thay đổi dữ liệu sau audit, phải ghi thành một quyết định nghiên cứu riêng.
-
-Audit tối thiểu chỉ kiểm tra các rủi ro có thể làm experiment sai:
-
-- **Dừng:** thiếu official split/column, schema labels không nhất quán, missing/empty text hoặc labels, label ID không hợp lệ, label ID lặp trong một row, exact duplicate text giữa các splits.
-- **Chỉ báo cáo:** exact duplicate text trong cùng split và các thống kê phân phối phục vụ EDA.
-
-Không tạo multi-hot example ở Stage 1. Shape, dtype và label mapping của multi-hot target được kiểm tra một lần trên inspected batch khi xây PyTorch `Dataset`/`DataLoader` ở Stage 3.
-
-### Leakage and selection
-
-- Không gộp validation hoặc test vào train.
-- Vocabulary, TF-IDF và `pos_weight` chỉ được fit/tính từ train.
-- Hyperparameter, checkpoint và threshold chỉ được chọn bằng validation.
-- Test chỉ được dùng sau khi config và threshold đã đóng băng.
-- Primary selection metric là validation macro-F1; luôn báo cáo micro-F1 song song.
-- Final neural comparison dùng seed cố định `42`; không chọn seed dựa trên test metrics.
-
-### Controlled comparison
-
-Giữ cố định giữa các neural architectures khi hợp lý:
-
-- Data splits, label order, vocabulary/tokenization và maximum sequence length.
-- Evaluation code, loss/threshold của comparison chính, hardware và early-stopping policy.
-- Batch size có thể khác vì memory nhưng phải được báo cáo.
-
-Kết quả là practical system comparison, không được diễn giải như causal architecture ablation nếu model capacity hoặc optimization khác nhau.
-
-Project dùng một seed cố định `42` cho các neural architectures. Không thực hiện multi-seed vì giới hạn thời gian/tài nguyên; final report phải ghi đây là limitation và không được kết luận về độ ổn định giữa các lần khởi tạo.
-
-## 4. Minimum Evaluation
-
-Chỉ tính các kết quả cần cho research questions:
-
-- **Model selection:** validation macro-F1.
-- **Overall quality:** macro precision/recall/F1 và micro precision/recall/F1.
-- **Rare-label analysis:** per-label support, precision, recall và F1.
-- **Threshold study:** so sánh fixed `0.5`, tuned global và tuned per-label thresholds; chỉ tune trên validation.
-- **Research slices:** text length, label cardinality và các nhóm negation/ambiguity có đủ evidence.
-- **Efficiency:** trainable parameter count, total training time và peak GPU memory trên cùng setup.
-- **Final comparison:** dùng các neural runs với seed cố định `42`; báo cáo trực tiếp metrics của từng model và nêu rõ chưa đo multi-seed stability.
-
-Không mặc định tính weighted-F1, samples-F1, Hamming loss, exact match, PR-AUC hoặc inference benchmark. Chỉ bổ sung khi final analysis cho thấy một metric đó cần để giải thích kết quả.
-
-## 5. Minimum Implementation Rules
-
-### Một trách nhiệm chỉ có một nguồn sự thật
-
-- Dataset audit chỉ chạy đầy đủ ở Stage 1. Các stage sau đọc contract đã đóng băng và chỉ kiểm tra nhanh boundary mà chúng trực tiếp phụ thuộc.
-- Multi-hot shape/dtype/mapping chỉ smoke-check ở Stage 3, không tạo example artifact riêng và không lặp lại ở từng model.
-- Tất cả neural models dùng chung data pipeline, training loop, evaluation code và checkpoint format.
-- Tất cả threshold experiments dùng cùng validation probabilities đã lưu; không forward model lại cho từng threshold.
-- Final tables và figures được tạo từ run outputs, không nhập tay lại kết quả.
-
-### Chỉ tách code khi có boundary thật
-
-- Một work-package script mặc định nằm trong một file.
-- `main()` điều phối; function riêng chỉ dành cho một pha có input/output hoặc invariant độc lập.
-- Không tạo helper để bọc một thao tác, rút ngắn code block hoặc kiểm tra lại output vừa được tạo.
-- Không tạo class nếu function và plain dictionary đã đủ.
-- Không thêm registry, factory, dataclass, config framework, logging framework, caching, CLI nhiều tầng hoặc report generator trong minimum scope.
-- Một file mới chỉ hợp lý khi logic được dùng lại giữa nhiều experiments, là implementation độc lập của một model, hoặc là artifact bắt buộc.
-
-Với Stage 1, một script gồm các pha `load contract → audit rows/splits → write artifact → main` là đủ. Có thể gộp các pha nếu data flow vẫn rõ; không cần function riêng cho từng counter, mapping, assertion hoặc example.
-
-### Artifact policy
-
-- Lưu artifact cần để tái lập kết quả hoặc thực hiện stage sau; không lưu output chỉ để chứng minh một dòng code hoạt động.
-- Debug và exploratory runs có thể bị ghi đè. Chỉ giữ checkpoint/output của candidate được chọn và final seed-42 runs.
-- Mỗi final run cần một record duy nhất chứa: model, seed, config, dataset fingerprint, best epoch, validation metric, parameter count, runtime, peak GPU memory và checkpoint/prediction paths.
-- Checkpoint neural phải đủ để load model với vocabulary và ordered label names tương ứng.
-
-## 6. Implementation Roadmap
-
-| Stage | Câu hỏi cần giải quyết | Minimum output |
-|---|---|---|
-| 0 | Environment có chạy đúng không? | Dependency file và một environment smoke check |
-| 1 | Dữ liệu thực tế có đủ tin cậy để nghiên cứu không? | Một audit script, `dataset_contract.json` và data-analysis notebook/note |
-| 2 | Classical baseline đạt mức nào? | Validation/test predictions và metrics của TF-IDF + Logistic Regression |
-| 3 | Shared PyTorch pipeline có đúng và neural baseline học được không? | Inspected batch, shared training loop, MLP checkpoint và metrics |
-| 4 | Sequence và self-attention models khác MLP thế nào? | BiLSTM/Transformer checkpoints, predictions và metrics |
-| 5 | Imbalance handling và threshold strategy thay đổi kết quả thế nào? | Models/predictions cần thiết và một bảng controlled experiments; threshold được chọn từ validation predictions |
-| 6 | Các hệ thống khác nhau thế nào và kết quả trả lời research questions ra sao? | Single-seed comparison, efficiency/error analysis và final report; nêu rõ limitation về stability |
-
-Stage là research milestone, không phải yêu cầu tạo package hoặc folder riêng. Không scaffold toàn bộ source tree từ đầu.
-
-## 7. Suggested Minimal Structure
-
-Chỉ tạo path khi stage tương ứng cần đến:
+## Repository structure
 
 ```text
-pytorch-multilabel-emotion/
-├── AGENTS.md
-├── README.md
-├── requirements.txt
-├── check_env.py
-├── data/
-│   ├── audit_goemotions.py
-│   └── artifacts/
-│       └── dataset_contract.json
-├── notebooks/                 # data analysis hoặc narrative exploration
-├── src/                       # shared code sau khi Stage 2/3 thực sự cần
-└── outputs/                   # selected/final run artifacts và final report
+data/
+  audit_goemotions.py                 # dataset audit and clean-split contract
+  artifacts/dataset_contract.json
+src/
+  run_tfidf_baseline.py
+  run_mean_pooling_mlp.py
+  run_bilstm_attention.py
+  run_transformer_encoder.py
+  run_bert_pretrained.py
+  run_transformer_pos_weight.py
+  run_architecture_thresholds.py      # common threshold evaluation
+outputs/
+  <system>/run.json                   # configuration and metrics
+  <system>/predictions.npz            # targets, probabilities, predictions
+  architecture_thresholds/            # fixed/global/per-label comparison
+  reports/baocaoprj2/main.pdf         # final report
 ```
 
-Không bắt buộc tạo sẵn `configs/`, nhiều output subfolders hoặc một file cho mỗi metric/model. Cấu trúc được mở rộng khi có artifact thật, không mở rộng để dự phòng.
+## Setup
 
-## 8. Environment
-
-Stack chính: Python 3.12, PyTorch, Hugging Face `datasets`, pandas, NumPy, scikit-learn, Matplotlib, tqdm và Jupyter.
-
-Setup trên Windows PowerShell:
+The project was developed with Python 3.12, PyTorch, Hugging Face Datasets/Transformers, and scikit-learn.
 
 ```powershell
 python -m venv venv
@@ -208,21 +79,47 @@ python -m pip install -r requirements.txt
 python check_env.py
 ```
 
-Environment hiện tại dùng PyTorch `2.13.0+cu132` với RTX 5060 Ti 16GB. CUDA wheel phải phù hợp với driver/GPU của máy chạy.
+The recorded experiments used CUDA, but the scripts automatically fall back to CPU where supported. Fine-tuning BERT requires substantially more memory and time than the train-from-scratch baselines.
 
-Neural models dùng custom PyTorch training/validation loop. Không dùng Hugging Face `Trainer`, PyTorch Lightning, W&B, Hydra, Optuna hoặc AutoML trong minimum project.
+## Reproduce the experiments
 
-## 9. Definition of Done
+Run commands from the repository root:
 
-Project hoàn thành khi có evidence cho các kết quả sau, không phụ thuộc vào số file hoặc số dòng code:
+```powershell
+python data\audit_goemotions.py
+python src\run_tfidf_baseline.py
+python src\run_mean_pooling_mlp.py
+python src\run_bilstm_attention.py
+python src\run_transformer_encoder.py
+python src\run_bert_pretrained.py
+python src\run_architecture_thresholds.py
+```
 
-- Dataset contract và data-analysis decisions đã đóng băng.
-- TF-IDF + Logistic Regression baseline đã được đánh giá.
-- Shared PyTorch data/training/evaluation pipeline chạy đúng.
-- Mean Pooling MLP, BiLSTM + Attention, Transformer Encoder và pretrained BERT reference đã được train và so sánh.
-- Standard BCE so với `pos_weight`, cùng fixed/global/per-label threshold, đã được kiểm tra có kiểm soát.
-- Final neural comparison dùng seed `42`, có quality metrics và efficiency measurements; báo cáo nêu rõ chưa đánh giá multi-seed stability.
-- Error analysis và final report trả lời các research questions, nêu methodology, results, limitations và conclusion đúng mức evidence.
-- `Current Status` ghi `Project completed`.
+Optional imbalance experiment:
 
-Quy tắc làm việc với agent, cách review code và cách cập nhật trạng thái nằm trong [`AGENTS.md`](AGENTS.md).
+```powershell
+python src\run_transformer_pos_weight.py
+python src\run_threshold_experiments.py
+```
+
+To regenerate report assets and compile the LaTeX report:
+
+```powershell
+venv\Scripts\python.exe outputs\reports\baocaoprj2\generate_report_assets.py
+cd outputs\reports\baocaoprj2
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+```
+
+The 413 MB BERT checkpoint is intentionally excluded from Git because it exceeds GitHub's file-size limit. The tracked `run.json`, predictions, metrics, and report contain the evidence needed to inspect the recorded result.
+
+## Limitations
+
+- Neural results use one fixed seed (`42`); multi-seed variance has not been measured.
+- Per-label thresholds have 28 degrees of freedom and may overfit rare validation labels.
+- BERT benefits from external pretraining and is not a strictly controlled architecture-only comparison.
+- Very rare labels such as `grief` and `relief` have unstable per-label test metrics.
+
+## Tech stack
+
+Python · PyTorch · Hugging Face Datasets/Transformers · scikit-learn · NumPy · Matplotlib · LaTeX
